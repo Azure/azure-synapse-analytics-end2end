@@ -1,0 +1,613 @@
+{
+    "$schema": "<relative path to createFormUI.schema.json>",
+    "view": {
+		"kind":"form",
+		"properties": {
+			"title": "Analytics end-to-end with Azure Synapse - Deployment Accelerator",
+			"steps": [
+				{
+                    "name": "basics",
+                    "label": "Basics",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope"
+                        },
+						{
+							"name": "deploymentModeSection",
+							"type": "Microsoft.Common.Section",
+							"label": "Deployment Mode",
+							"elements": [
+								{
+									"name": "deploymentModeDesc",
+									"type": "Microsoft.Common.TextBlock",
+									"visible": true,
+									"options": {
+										"text": "Choose between deployment modes. 'Default (public endpoints)' will deploy services with public endpoints. 'vNet Integrated' will deploy services with Private Link endpoints in a given vNet.",
+										"link": {
+											"label": "See more information about the architecture here.",
+											"uri": "https://www.microsoft.com"
+										}
+									}
+								},
+								{
+									"name": "deploymentMode",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deployment Mode",
+									"defaultValue": "Default (public endpoints)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+											{
+												"label": "Default (public endpoints)",
+												"value": "default"
+											},
+											{
+												"label": "vNet Integrated",
+												"value": "vNet"
+											}
+										],
+										"required": true
+									},
+									"visible": true
+								}
+							],
+							"visible": true
+						}
+                    ]
+                },
+				{
+					"name": "coreSettings",
+					"label": "Core Settings",
+					"elements": [
+						{
+							"name": "coreServicesInfo",
+							"type": "Microsoft.Common.InfoBox",
+							"visible": true,
+							"options": {
+								"icon": "Info",
+								"text": "Core services include Azure Synapse Analytics, Azure Data Lake Storage Gen 2 and Azure Key Vault",
+								"uri": "https://www.microsoft.com"
+							}
+						},
+						{
+                            "name": "synapseSettingsSection",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Azure Synapse Settings",
+                            "elements": [
+                                {
+                                    "name": "synapseSection",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Please configure your Synapse Workspace.",
+                                        "link": {
+                                            "label": "Learn more",
+                                            "uri": "https://www.microsoft.com"
+                                        }
+                                    }
+                                },
+								{
+									"name": "ctrlDeploySynapseSQLPool",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Create Dedicated Synapse SQL Pool",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "A Synapse Dedicated SQL Pool will be provisioned at DW100 performance level. Please scale up as required once provisioning is complete.",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								},
+								{
+									"name": "synapseDedicatedSQLPoolName",
+									"type": "Microsoft.Common.TextBox",
+									"label": "Synapse SQL Pool Name",
+									"placeholder": "",
+									"defaultValue": "EnterpriseDW",
+									"toolTip": "Use only allowed characters",
+									"constraints": {
+										"required": true,
+										"regex": "^[a-z0-9A-Z]{1,30}$",
+										"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+									},
+									"visible": "[equals(steps('coreSettings').synapseSettingsSection.ctrlDeploySynapseSQLPool, 'Yes')]"
+								},
+								{
+									"name": "ctrlDeploySynapseSparkPool",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Create Synapse Spark Pool",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "A 'Small' Synapse Spark Pool will be provisioned. Please scale up as required once provisioning is complete.",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								},
+								{
+									"name": "synapseSparkPoolName",
+									"type": "Microsoft.Common.TextBox",
+									"label": "Synapse Spark Pool Name",
+									"placeholder": "",
+									"defaultValue": "SparkCluster",
+									"toolTip": "Use only allowed characters",
+									"constraints": {
+										"required": true,
+										"regex": "^[a-z0-9A-Z]{1,30}$",
+										"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+									},
+									"visible": "[equals(steps('coreSettings').synapseSettingsSection.ctrlDeploySynapseSparkPool, 'Yes')]"
+								},
+								{
+									"name": "ctrlDeploySynapseADXPool",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Create Data Explorer Pool",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "A Synapse Data Explorer Compute Optimised Pool will be provisioned with size 'Extra Small'. Please scale up as required once provisioning is complete.",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								},
+								{
+									"name": "synapseADXPoolName",
+									"type": "Microsoft.Common.TextBox",
+									"label": "Synapse Data Explorer Pool Name",
+									"placeholder": "",
+									"defaultValue": "ADXPool",
+									"toolTip": "Use only allowed characters",
+									"constraints": {
+										"required": true,
+										"regex": "^[a-z0-9A-Z]{1,30}$",
+										"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+									},
+									"visible": "[equals(steps('coreSettings').synapseSettingsSection.ctrlDeploySynapseADXPool, 'Yes')]"
+								},
+								{
+									"name": "synapseADXDatabaseName",
+									"type": "Microsoft.Common.TextBox",
+									"label": "Synapse Data Explorer Database Name",
+									"placeholder": "",
+									"defaultValue": "ADXDB",
+									"toolTip": "Use only allowed characters",
+									"constraints": {
+										"required": true,
+										"regex": "^[a-z0-9A-Z]{1,30}$",
+										"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+									},
+									"visible": "[equals(steps('coreSettings').synapseSettingsSection.ctrlDeploySynapseADXPool, 'Yes')]"
+								},
+								{
+									"name": "synapseSqlAdminUserName",
+									"type": "Microsoft.Common.TextBox",
+									"label": "Synapse SQL Admin User Name",
+									"placeholder": "",
+									"defaultValue": "azsynapseadmin",
+									"toolTip": "Use only allowed characters",
+									"constraints": {
+										"required": true,
+										"regex": "^[a-z0-9A-Z]{1,30}$",
+										"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
+									}
+								},
+								{
+									"name": "synapseSqlAdminPassword",
+									"type": "Microsoft.Common.PasswordBox",
+									"label": {
+										"password": "Password",
+										"confirmPassword": "Confirm password"
+									},
+									"toolTip": "",
+									"constraints": {
+										"required": true,
+										"regex": "(?=^.{8,}$)(?=.*\\d)(?=.*[!@#$%^&*]+)(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$",
+										"validationMessage": "Password must be at least 8 characters long, including both uppercase and lowercase characters, numbers and special characters."
+									},
+									"options": {
+										"hideConfirmation": false
+									},
+									"visible": true
+								}
+								
+								
+                            ],
+                            "visible": true
+                        },
+						{
+                            "name": "dataLakeSettingsSection",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Azure Data Lake Storage Gen 2 Settings",
+                            "elements": [
+                                {
+                                    "name": "dataLakeSection",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Please configure your Azure Data Lake Storage Gen 2 account.",
+                                        "link": {
+                                            "label": "Learn more",
+                                            "uri": "https://www.microsoft.com"
+                                        }
+                                    }
+                                },
+                                {
+									"name": "allowSharedKeyAccess",
+									"type": "Microsoft.Common.CheckBox",
+									"label": "Allow Shared Key authorization",
+									"toolTip": "Enable shared key authorization. If enabled, ensure your access keys are protected.",
+									"constraints": {
+										"required": false
+									}
+								},
+								{
+									"name": "manageAccessKeys",
+									"type": "Microsoft.Common.TextBlock",
+									"visible": true,
+									"options": {
+										"text": "If Shared Key authorization is enabled, make sure you keep your access keys secure by following the best practices recommendations.",
+										"link": {
+										"label": "Learn more",
+										"uri": "https://docs.microsoft.com/azure/storage/common/storage-account-keys-manage"
+										}
+									}
+								}
+                            ],
+                            "visible": true
+                        }
+						
+					]
+				},
+				{
+					"name": "workloadComponents",
+					"label": "Workload Components",
+					"elements": [
+						{
+                            "name": "purviewSettingsSection",
+                            "type": "Microsoft.Common.Section",
+                            "label": "Data Governance Settings",
+                            "elements": [
+                                {
+                                    "name": "purviewSection",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Please configure your Purview account.",
+                                        "link": {
+                                            "label": "Learn more",
+                                            "uri": "https://www.microsoft.com"
+                                        }
+                                    }
+                                },
+								{
+									"name": "ctrlDeployPurview",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deploy Azure Purview",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								}
+							]
+						},
+						{
+                            "name": "aiSettingsSection",
+                            "type": "Microsoft.Common.Section",
+                            "label": "AI Settings",
+                            "elements": [
+                                {
+                                    "name": "aiSection",
+                                    "type": "Microsoft.Common.TextBlock",
+                                    "visible": true,
+                                    "options": {
+                                        "text": "Please configure your AI workload.",
+                                        "link": {
+                                            "label": "Learn more",
+                                            "uri": "https://www.microsoft.com"
+                                        }
+                                    }
+                                },
+								{
+									"name": "aiServicesInfo",
+									"type": "Microsoft.Common.InfoBox",
+									"visible": true,
+									"options": {
+										"icon": "Info",
+										"text": "AI services include Azure Machine Learning, Anomaly Detector and Cognitive Services.",
+										"uri": "https://www.microsoft.com"
+									}
+								},
+								{
+									"name": "ctrlDeployAI",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deploy AI Services",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								}
+							]
+						},
+						{
+							"name": "streamingSettings",
+							"type": "Microsoft.Common.Section",
+							"label": "Streaming Settings",
+							"elements": [
+								{
+									"name": "streamingServicesInfo",
+									"type": "Microsoft.Common.InfoBox",
+									"visible": true,
+									"options": {
+										"icon": "Info",
+										"text": "Data streaming services include Azure EventHubs, Azure IoT Hub and Stream Analytics.",
+										"uri": "https://www.microsoft.com"
+									}
+								},
+								{
+									"name": "ctrlDeployStreaming",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deploy Data Streaming Services",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								},
+								{
+									"name": "streamIngestionChoice",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Data stream ingestion service",
+									"defaultValue": "Azure Event Hubs",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Azure Event Hubs",
+											"value": "EventHub"
+										},
+										{
+											"label": "Azure IoT Hub",
+											"value": "IoTHub"
+										}
+										],
+										"required": true
+									},
+									"visible": "[equals(steps('workloadComponents').streamingSettings.ctrlDeployStreaming, 'Yes')]"
+								}
+							],
+							"visible": true
+						},
+						{
+							"name": "dataSharingSettings",
+							"type": "Microsoft.Common.Section",
+							"label": "Data Sharing Settings",
+							"elements": [
+								{
+									"name": "ctrlDeployDataShare",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deploy Azure Data Share",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								}
+							],
+							"visible": true
+						}
+					]
+				},
+				{
+					"name": "networkSettings",
+					"label": "Network Settings",
+					"elements": [
+						{
+							"name": "networkDefaultInfo",
+							"type": "Microsoft.Common.InfoBox",
+							"visible": "[equals(steps('basics').deploymentModeSection.deploymentMode, 'default')]",
+							"options": {
+								"icon": "Warning",
+								"text": "Your Deployment Mode is set to 'Default (Public Endpoints)' and all services will be deployed with public endpoints. Please review the firewall configuration for the deployed services to allow connectivity from approved networks.",
+								"uri": "https://www.microsoft.com"
+							}
+						},
+						{
+							"name": "vNetConfigSection",
+							"type": "Microsoft.Common.Section",
+							"label": "Network Settings",
+							"elements": [
+								{
+									"name": "vNetConfig",
+									"type": "Microsoft.Network.VirtualNetworkCombo",
+									"label": {
+										"virtualNetwork": "Select virtual network",
+										"subnets": "Subnets"
+									},
+									"toolTip": {
+										"virtualNetwork": "",
+										"subnets": ""
+									},
+									"defaultValue": {
+										"name": "azvnet01",
+										"addressPrefixSize": "/16"
+									},
+									"constraints": {
+										"minAddressPrefixSize": "/16"
+									},
+									"options": {
+										"hideExisting": false
+									},
+									"subnets": {
+										"default": {
+											"label": "default",
+											"defaultValue": {
+												"name": "default",
+												"addressPrefixSize": "/24"
+											},
+											"constraints": {
+												"minAddressPrefixSize": "/24",
+												"minAddressCount": 12,
+												"requireContiguousAddresses": true
+											}
+										}
+									},
+									"visible": true
+								},
+								{
+									"name": "existingVNetWarning",
+									"type": "Microsoft.Common.InfoBox",
+									"visible": "[equals(steps('networkSettings').vNetConfigSection.vNetConfig.newOrExisting, 'existing')]",
+									"options": {
+										"icon": "Warning",
+										"text": "Ensure private endpoint network policies are disabled for the selected vNet before proceeding with deployment.",
+										"uri": "https://docs.microsoft.com/azure/private-link/disable-private-endpoint-network-policy"
+									}
+								},
+								{
+									"name": "ctrlDeployPrivateDNSZones",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deploy Private DNS Zones",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								}
+							],
+							"visible": "[equals(steps('basics').deploymentModeSection.deploymentMode, 'vNet')]"
+						}
+						
+						
+					]
+				},
+				{
+					"name": "tags",
+					"label": "Tags",
+					"elements": [
+						{
+							"name": "tagsByResource",
+							"type": "Microsoft.Common.TagsByResource",
+							"resources": [
+								"Microsoft.Storage/storageAccounts",
+								"Microsoft.Compute/virtualMachines"
+							]
+						}
+					]
+				}
+			]
+		},
+        "outputs": {
+			"kind":"ResourceGroup",
+			"resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+			"parameters":{
+				"deploymentMode": "[steps('basics').deploymentModeSection.deploymentMode]",
+				"ctrlDeployPurview": "[equals(steps('workloadComponents').purviewSettingsSection.ctrlDeployPurview, 'Yes')]",
+				"ctrlDeployAI": "[equals(steps('workloadComponents').aiSettingsSection.ctrlDeployAI, 'Yes')]",
+				"ctrlDeployStreaming": "[equals(steps('workloadComponents').streamingSettings.ctrlDeployStreaming, 'Yes')]",
+				"ctrlDeployDataShare": "[equals(steps('workloadComponents').dataSharingSettings.ctrlDeployDataShare, 'Yes')]",
+				"ctrlDeployPrivateDNSZones": "[equals(steps('networkSettings').vNetConfigSection.ctrlDeployPrivateDNSZones, 'Yes')]",
+				"ctrlDeploySynapseSQLPool": "[equals(steps('coreSettings').synapseSettingsSection.ctrlDeploySynapseSQLPool, 'Yes')]",
+				"synapseDedicatedSQLPoolName": "[steps('coreSettings').synapseSettingsSection.synapseDedicatedSQLPoolName]",
+				"ctrlDeploySynapseSparkPool": "[equals(steps('coreSettings').synapseSettingsSection.ctrlDeploySynapseSparkPool, 'Yes')]",
+				"ctrlDeploySynapseADXPool": "[equals(steps('coreSettings').synapseSettingsSection.ctrlDeploySynapseADXPool, 'Yes')]",
+				"synapseADXPoolName": "[steps('coreSettings').synapseSettingsSection.synapseADXPoolName]",
+				"synapseADXDatabaseName": "[steps('coreSettings').synapseSettingsSection.synapseADXDatabaseName]",
+				"synapseSparkPoolName": "[steps('coreSettings').synapseSettingsSection.synapseSparkPoolName]",
+				"allowSharedKeyAccess": "[steps('coreSettings').dataLakeSettingsSection.allowSharedKeyAccess]",
+				"synapseSqlAdminUserName": "[steps('coreSettings').synapseSettingsSection.synapseSqlAdminUserName]",
+				"synapseSqlAdminPassword": "[steps('coreSettings').synapseSettingsSection.synapseSqlAdminPassword]",
+				"ctrlNewOrExistingVNet": "[steps('networkSettings').vNetConfigSection.vNetConfig.newOrExisting]",
+				"existingVNetResourceGroupName": "[steps('networkSettings').vNetConfigSection.vNetConfig.resourceGroup]",
+				"vNetName": "[steps('networkSettings').vNetConfigSection.vNetConfig.name]",
+				"vNetIPAddressPrefixes": "[steps('networkSettings').vNetConfigSection.vNetConfig.addressPrefixes]",
+				"vNetSubnetName": "[steps('networkSettings').vNetConfigSection.vNetConfig.subnets.default.name]",
+				"vNetSubnetIPAddressPrefix": "[steps('networkSettings').vNetConfigSection.vNetConfig.subnets.default.addressPrefix]"
+			}
+        }
+    }
+}
