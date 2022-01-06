@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1124.51302",
-      "templateHash": "9619757645157603727"
+      "templateHash": "9602921805505172358"
     }
   },
   "parameters": {
@@ -440,11 +440,11 @@
       "[parameters('dataLakeTrustedZoneName')]",
       "[parameters('dataLakeCuratedZoneName')]"
     ],
-    "synapsePSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvU3luYXBzZVBvc3REZXBsb3kucHMx",
+    "synapsePSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9TeW5hcHNlUG9zdERlcGxveS5wczE=",
     "azMLWorkspaceName": "[if(parameters('ctrlDeployAI'), format('-AzMLWorkspaceName {0}', parameters('azureMLWorkspaceName')), '')]",
-    "purviewPSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvUHVydmlld1Bvc3REZXBsb3kucHMx",
+    "purviewPSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9QdXJ2aWV3UG9zdERlcGxveS5wczE=",
     "datalakeAccountPurviewParams": "[format('-WorkspaceDataLakeAccountName {0} -RawDataLakeAccountName {1} -CuratedDataLakeAccountName {2}', parameters('workspaceDataLakeAccountName'), parameters('rawDataLakeAccountName'), parameters('curatedDataLakeAccountName'))]",
-    "cleanUpPSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvQ2xlYW5VcFBvc3REZXBsb3kucHMx",
+    "cleanUpPSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9DbGVhblVwUG9zdERlcGxveS5wczE=",
     "cleanUpScriptArguments": "[format('-UAMIResourceID {0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('deploymentScriptUAMIName')))]"
   },
   "resources": [
