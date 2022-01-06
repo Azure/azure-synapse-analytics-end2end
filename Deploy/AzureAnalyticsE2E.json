@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1124.51302",
-      "templateHash": "9602921805505172358"
+      "templateHash": "13560196500869798874"
     }
   },
   "parameters": {
@@ -2017,7 +2017,7 @@
             "value": "[if(parameters('ctrlDeploySynapseSparkPool'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceSparkID.value, '')]"
           },
           "synapseSparkPoolName": {
-            "value": "[if(parameters('ctrlDeploySynapseSparkPool'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceSparkName.value, '')]"
+            "value": "[if(parameters('ctrlDeploySynapseSparkPool'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceSparkName.value, parameters('synapseSparkPoolName'))]"
           },
           "textAnalyticsAccountName": {
             "value": "[parameters('textAnalyticsAccountName')]"

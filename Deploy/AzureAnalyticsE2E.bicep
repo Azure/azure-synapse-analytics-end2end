@@ -439,7 +439,7 @@ module m_ServiceConnectionsDeploy 'modules/ServiceConnectionsDeploy.bicep' = {
     synapseWorkspaceID: m_SynapseDeploy.outputs.synapseWorkspaceID
     synapseWorkspaceName: m_SynapseDeploy.outputs.synapseWorkspaceName
     synapseSparkPoolID: ctrlDeploySynapseSparkPool ? m_SynapseDeploy.outputs.synapseWorkspaceSparkID : ''
-    synapseSparkPoolName: ctrlDeploySynapseSparkPool ? m_SynapseDeploy.outputs.synapseWorkspaceSparkName : ''
+    synapseSparkPoolName: ctrlDeploySynapseSparkPool ? m_SynapseDeploy.outputs.synapseWorkspaceSparkName : synapseSparkPoolName
     textAnalyticsAccountName:  textAnalyticsAccountName
     uamiPrincipalID: m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID
   }
