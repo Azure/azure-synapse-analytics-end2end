@@ -1,13 +1,18 @@
 param(
-  [string] $DeploymentMode,
+  [string] $NetworkIsolationMode,
   [string] $SubscriptionID,
   [string] $ResourceGroupName,
   [string] $ResourceGroupLocation,
-  [string] $WorkspaceName,
+  [string] $SynapseWorkspaceName,
+  [string] $SynapseWorkspaceID,
   [string] $KeyVaultName,
   [string] $KeyVaultID,
-  [string] $DataLakeStorageAccountName,
-  [string] $DataLakeStorageAccountID,
+  [string] $WorkspaceDataLakeAccountName,
+  [string] $WorkspaceDataLakeAccountID,
+  [string] $RawDataLakeAccountName,
+  [string] $RawDataLakeAccountID,
+  [string] $CuratedDataLakeAccountName,
+  [string] $CuratedDataLakeAccountID,
   [string] $UAMIIdentityID,
   [bool] $CtrlDeployAI,
   [AllowEmptyString()]
@@ -18,10 +23,16 @@ param(
   [string] $AzMLWorkspaceName,
   [AllowEmptyString()]
   [Parameter(Mandatory=$false)]
+  [string] $TextAnalyticsAccountID,
+  [AllowEmptyString()]
+  [Parameter(Mandatory=$false)]
   [string] $TextAnalyticsAccountName,
   [AllowEmptyString()]
   [Parameter(Mandatory=$false)]
   [string] $TextAnalyticsEndpoint,
+  [AllowEmptyString()]
+  [Parameter(Mandatory=$false)]
+  [string] $AnomalyDetectorAccountID,
   [AllowEmptyString()]
   [Parameter(Mandatory=$false)]
   [string] $AnomalyDetectorAccountName,
@@ -32,22 +43,57 @@ param(
 
 
 #------------------------------------------------------------------------------------------------------------
-# FUNCTION DEFINITION
+# FUNCTION DEFINITIONS
 #------------------------------------------------------------------------------------------------------------
+function Set-SynapseControlPlaneOperation{
+  param (
+    [string] $SynapseWorkspaceID,
+    [string] $HttpRequestBody
+  )
+  
+  $uri = "https://management.azure.com$SynapseWorkspaceID`?api-version=2021-06-01"
+  $token = (Get-AzAccessToken -Resource "https://management.azure.com").Token
+  $headers = @{ Authorization = "Bearer $token" }
+
+  $retrycount = 1
+  $completed = $false
+  $secondsDelay = 30
+
+  while (-not $completed) {
+    try {
+      Invoke-RestMethod -Method Patch -ContentType "application/json" -Uri $uri -Headers $headers -Body $HttpRequestBody -ErrorAction Stop
+      Write-Host "Control plane operation completed successfully."
+      $completed = $true
+    }
+    catch {
+      if ($retrycount -ge $retries) {
+          Write-Host "Control plane operation failed the maximum number of $retryCount times."
+          Write-Warning $Error[0]
+          throw
+      } else {
+          Write-Host "Control plane operation failed $retryCount time(s). Retrying in $secondsDelay seconds."
+          Write-Warning $Error[0]
+          Start-Sleep $secondsDelay
+          $retrycount++
+      }
+    }
+  }
+}
 
 function Save-SynapseLinkedService{
   param (
-    [string] $WorkspaceName,
+    [string] $SynapseWorkspaceName,
     [string] $LinkedServiceName,
     [string] $LinkedServiceRequestBody
   )
 
-  [string] $uri = "https://$WorkspaceName.dev.azuresynapse.net/linkedservices/$LinkedServiceName"
+  [string] $uri = "https://$SynapseWorkspaceName.dev.azuresynapse.net/linkedservices/$LinkedServiceName"
   $uri += "?api-version=2019-06-01-preview"
 
   Write-Host "Creating Linked Service [$LinkedServiceName]..."
   $retrycount = 1
   $completed = $false
+  $secondsDelay = 30
 
   while (-not $completed) {
     try {
@@ -78,13 +124,14 @@ $retries = 10
 $secondsDelay = 30
 
 #------------------------------------------------------------------------------------------------------------
-# ASSIGN WORKSPACE ADMINISTRATOR TO USER-ASSIGNED MANAGED IDENTITY
+# CONTROL PLANE OPERATION: ASSIGN SYNAPSE WORKSPACE ADMINISTRATOR TO USER-ASSIGNED MANAGED IDENTITY
+# UAMI needs Synapse Admin rights before it can make calls to the Data Plane APIs to create Synapse objects
 #------------------------------------------------------------------------------------------------------------
 
 $token = (Get-AzAccessToken -Resource "https://dev.azuresynapse.net").Token
 $headers = @{ Authorization = "Bearer $token" }
 
-$uri = "https://$WorkspaceName.dev.azuresynapse.net/rbac/roleAssignments?api-version=2020-02-01-preview"
+$uri = "https://$SynapseWorkspaceName.dev.azuresynapse.net/rbac/roleAssignments?api-version=2020-02-01-preview"
 
 #Assign Synapse Workspace Administrator Role to UAMI
 $body = "{
@@ -97,7 +144,8 @@ Write-Host "Assign Synapse Administrator Role to UAMI..."
 Invoke-RestMethod -Method Post -ContentType "application/json" -Uri $uri -Headers $headers -Body $body
 
 #------------------------------------------------------------------------------------------------------------
-# ASSIGN SYNAPSE APACHE SPARK ADMINISTRATOR TO AZURE ML LINKED SERVICE MSI
+# CONTROL PLANE OPERATION: ASSIGN SYNAPSE APACHE SPARK ADMINISTRATOR TO AZURE ML LINKED SERVICE MSI
+# If AI Services are deployed, then Azure ML MSI needs Synapse Spark Admin rights to use Spark clusters as compute
 #------------------------------------------------------------------------------------------------------------
 
 if (-not ([string]::IsNullOrEmpty($AzMLSynapseLinkedServiceIdentityID))) {
@@ -118,7 +166,7 @@ if (-not ([string]::IsNullOrEmpty($AzMLSynapseLinkedServiceIdentityID))) {
 }
 
 #------------------------------------------------------------------------------------------------------------
-# CREATE AZURE KEY VAULT LINKED SERVICE
+# DATA PLANE OPERATION: CREATE AZURE KEY VAULT LINKED SERVICE
 #------------------------------------------------------------------------------------------------------------
 
 #Create AKV Linked Service. Linked Service name same as Key Vault's.
@@ -134,10 +182,37 @@ $body = "{
   }
 }"
 
-Save-SynapseLinkedService $WorkspaceName $KeyVaultName $body
+Save-SynapseLinkedService $SynapseWorkspaceName $KeyVaultName $body
 
 #------------------------------------------------------------------------------------------------------------
-# CREATE AZURE ML LINKED SERVICE
+# DATA PLANE OPERATION: CREATE WORKSPACE, RAW AND CURATED DATA LAKES LINKED SERVICES
+#------------------------------------------------------------------------------------------------------------
+
+$dataLakeAccountNames = $WorkspaceDataLakeAccountName, $RawDataLakeAccountName, $CuratedDataLakeAccountName
+$dataLakeDFSEndpoints = "https://$WorkspaceDataLakeAccountName.dfs.core.windows.net", "https://$RawDataLakeAccountName.dfs.core.windows.net", "https://$CuratedDataLakeAccountName.dfs.core.windows.net"
+
+for ($i = 0; $i -lt $dataLakeAccountNames.Length ; $i++ ) {
+
+  $body = "{
+    name: ""$($dataLakeAccountNames[$i])"",
+    properties: {
+      annotations: [],
+      type: ""AzureBlobFS"",
+      typeProperties: {
+        url: ""$($dataLakeDFSEndpoints[$i])""
+      },
+      connectVia: {
+        referenceName: ""AutoResolveIntegrationRuntime"",
+        type: ""IntegrationRuntimeReference""
+      }
+    }
+  }"
+
+  Save-SynapseLinkedService $SynapseWorkspaceName $dataLakeAccountNames[$i] $body
+}
+
+#------------------------------------------------------------------------------------------------------------
+# DATA PLANE OPERATION: CREATE AZURE ML LINKED SERVICE
 #------------------------------------------------------------------------------------------------------------
 #-AzMLWorkspaceName paramater will be passed blank if AI workloadis not deployed.
 
@@ -160,11 +235,11 @@ if (-not ([string]::IsNullOrEmpty($AzMLWorkspaceName))) {
     }
   }"
 
-  Save-SynapseLinkedService $WorkspaceName $AzMLWorkspaceName $body
+  Save-SynapseLinkedService $SynapseWorkspaceName $AzMLWorkspaceName $body
 }
 
 #------------------------------------------------------------------------------------------------------------
-# CREATE COGNITIVE SERVICES (TEXT ANALYTICS AND ANOMALY DETECTOR) LINKED SERVICES
+# DATA PLANE OPERATION: CREATE COGNITIVE SERVICES (TEXT ANALYTICS AND ANOMALY DETECTOR) LINKED SERVICES
 #------------------------------------------------------------------------------------------------------------
 if ($CtrlDeployAI) {
   $cognitiveServiceNames = $TextAnalyticsAccountName, $AnomalyDetectorAccountName
@@ -200,32 +275,32 @@ if ($CtrlDeployAI) {
       }
     }"
   
-    Save-SynapseLinkedService $WorkspaceName $cognitiveServiceNames[$i] $body
+    Save-SynapseLinkedService $SynapseWorkspaceName $cognitiveServiceNames[$i] $body
   }
 }
 
-
 #------------------------------------------------------------------------------------------------------------
-# CREATE MANAGED PRIVATE ENDPOINTS
+# DATA PLANE OPERATOR: CREATE AND APPROVE MANAGED PRIVATE ENDPOINTS
+# For vNet-integrated deployments, create the private endpoints to the resources required by Synapse managed vNet
 #------------------------------------------------------------------------------------------------------------
 
-[string[]] $managedPrivateEndpointNames = $KeyVaultName, $DataLakeStorageAccountName
-[string[]] $managedPrivateEndpointIDs = $KeyVaultID, $DataLakeStorageAccountID
-[string[]] $managedPrivateEndpointGroups = 'vault', 'dfs'
+[string[]] $managedPrivateEndpointNames = $KeyVaultName, $WorkspaceDataLakeAccountName, $RawDataLakeAccountName, $CuratedDataLakeAccountName, $TextAnalyticsAccountName, $AnomalyDetectorAccountName
+[string[]] $managedPrivateEndpointIDs = $KeyVaultID, $WorkspaceDataLakeAccountID, $RawDataLakeAccountID, $CuratedDataLakeAccountID, $TextAnalyticsAccountID, $AnomalyDetectorAccountID
+[string[]] $managedPrivateEndpointGroups = 'vault', 'dfs', 'dfs', 'dfs', 'account', 'account'
 
-if ($DeploymentMode -eq "vNet") {
+if ($NetworkIsolationMode -eq "vNet") {
   for($i = 0; $i -le ($managedPrivateEndpointNames.Length - 1); $i += 1)
   {
     $managedPrivateEndpointName = $managedPrivateEndpointNames[$i]
     $managedPrivateEndpointID = $managedPrivateEndpointIDs[$i]
     $managedPrivateEndpointGroup = $managedPrivateEndpointGroups[$i] 
 
-    $uri = "https://$WorkspaceName.dev.azuresynapse.net"
+    $uri = "https://$SynapseWorkspaceName.dev.azuresynapse.net"
     $uri += "/managedVirtualNetworks/default/managedPrivateEndpoints/$managedPrivateEndpointName"
     $uri += "?api-version=2019-06-01-preview"
 
     $body = "{
-        name: ""$managedPrivateEndpointName"",
+        name: ""$managedPrivateEndpointName-$managedPrivateEndpointGroup"",
         type: ""Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints"",
         properties: {
           privateLinkResourceId: ""$managedPrivateEndpointID"",
@@ -271,7 +346,7 @@ if ($DeploymentMode -eq "vNet") {
         $managedPrivateEndpointName = $managedPrivateEndpointNames[$i]
         $managedPrivateEndpointID = $managedPrivateEndpointIDs[$i]
         # Approve KeyVault Private Endpoint
-        $privateEndpoints = Get-AzPrivateEndpointConnection -PrivateLinkResourceId $managedPrivateEndpointID -ErrorAction Stop | where-object{$_.PrivateEndpoint.Id -match ($WorkspaceName + "." + $managedPrivateEndpointName)} | select-object Id, ProvisioningState, PrivateLinkServiceConnectionState
+        $privateEndpoints = Get-AzPrivateEndpointConnection -PrivateLinkResourceId $managedPrivateEndpointID -ErrorAction Stop | where-object{$_.PrivateEndpoint.Id -match ($SynapseWorkspaceName + "." + $managedPrivateEndpointName)} | select-object Id, ProvisioningState, PrivateLinkServiceConnectionState
         
         foreach ($privateEndpoint in $privateEndpoints) {
           if ($privateEndpoint.ProvisioningState -eq "Succeeded") {
@@ -303,4 +378,14 @@ if ($DeploymentMode -eq "vNet") {
       }
     }
   }
+}
+
+#------------------------------------------------------------------------------------------------------------
+# CONTROL PLANE OPERATOR: DISABLE PUBLIC NETWORK ACCESS
+# For vNet-integrated deployments, disable public network access. Access to Synapse only through private endpoints.
+#------------------------------------------------------------------------------------------------------------
+
+if ($NetworkIsolationMode -eq "vNet") {
+  $body = "{properties:{publicNetworkAccess:""Disabled""}}"
+  Set-SynapseControlPlaneOperation -SynapseWorkspaceID $SynapseWorkspaceID -HttpRequestBody $body
 }

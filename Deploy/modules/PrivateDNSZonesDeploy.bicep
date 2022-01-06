@@ -162,6 +162,28 @@ module m_privateDNSZoneAzureMLNotebooks 'PrivateDNSZone.bicep' = if(ctrlDeployAI
   }
 }
 
+//IoTHub DNS Zone: privatelink.azure-devices.net
+//Required by IoTHub
+module m_privateDNSZoneIoTHub 'PrivateDNSZone.bicep' = if(ctrlDeployStreaming == true) {
+  name: 'PrivateDNSZoneIoTHub'
+  params: {
+    dnsZoneName: 'privatelink.azure-devices.net'
+    vNetID: vNetID
+    vNetName: vNetName
+  }
+}
+
+//Cognitive Services DNS Zone: privatelink.azure-devices.net
+//Required by IoTHub
+module m_privateDNSZoneCognitiveService 'PrivateDNSZone.bicep' = if(ctrlDeployAI == true) {
+  name: 'PrivateDNSZoneCognitiveService'
+  params: {
+    dnsZoneName: 'privatelink.cognitiveservices.azure.com'
+    vNetID: vNetID
+    vNetName: vNetName
+  }
+}
+
 output storageDFSPrivateDNSZoneID string = m_privateDNSZoneStorageDFS.outputs.dnsZoneID
 output storageBlobPrivateDNSZoneID string = ctrlDeployPurview == true || ctrlDeployAI == true ? m_privateDNSZoneStorageBlob.outputs.dnsZoneID: ''
 output storageQueuePrivateDNSZoneID string = ctrlDeployPurview ? m_privateDNSZoneStorageQueue.outputs.dnsZoneID : ''
@@ -175,3 +197,5 @@ output purviewAccountPrivateDNSZoneID string = ctrlDeployPurview ? m_privateDNSZ
 output acrPrivateDNSZoneID string = ctrlDeployAI ? m_privateDNSZoneACR.outputs.dnsZoneID : ''
 output azureMLAPIPrivateDNSZoneID string = ctrlDeployAI ? m_privateDNSZoneAzureMLAPI.outputs.dnsZoneID : ''
 output azureMLNotebooksPrivateDNSZoneID string = ctrlDeployAI ? m_privateDNSZoneAzureMLNotebooks.outputs.dnsZoneID : ''
+output iotHubPrivateDNSZoneID string = ctrlDeployStreaming ? m_privateDNSZoneIoTHub.outputs.dnsZoneID : ''
+output cognitiveServicePrivateDNSZoneID string = ctrlDeployAI ? m_privateDNSZoneCognitiveService.outputs.dnsZoneID : ''

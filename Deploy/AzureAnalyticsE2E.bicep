@@ -6,8 +6,8 @@
   'default'
   'vNet'
 ])
-@description('Deployment Mode')
-param deploymentMode string = 'default'
+@description('Network Isolation Mode')
+param networkIsolationMode string = 'default'
 
 @description('Resource Location')
 param resourceLocation string = resourceGroup().location
@@ -23,8 +23,6 @@ param ctrlDeployPurview bool = true     //Controls the deployment of Azure Purvi
 param ctrlDeployAI bool = true     //Controls the deployment of Azure ML and Cognitive Services
 param ctrlDeployStreaming bool = true   //Controls the deployment of EventHubs and Stream Analytics
 param ctrlDeployDataShare bool = true   //Controls the deployment of Azure Data Share
-param ctrlPostDeployScript bool = true  //Controls the execution of post-deployment script
-param ctrlAllowStoragePublicContainer bool = false //Controls the creation of data lake Public container
 param ctrlDeployPrivateDNSZones bool = true //Controls the creation of private DNS zones for private links
 
 @allowed([
@@ -33,6 +31,11 @@ param ctrlDeployPrivateDNSZones bool = true //Controls the creation of private D
 ])
 param ctrlNewOrExistingVNet string = 'new'
 
+@allowed([
+  'eventhub'
+  'iothub'
+])
+param ctrlStreamIngestionService string = 'eventhub'
 
 param deploymentDatetime string = utcNow()
 //********************************************************
@@ -48,8 +51,8 @@ param vNetName string = 'azvnet${uniqueSuffix}'
 
 @description('Virtual Network IP Address Space')
 param vNetIPAddressPrefixes array = [
-    '10.1.0.0/16'
-  ]
+  '10.1.0.0/16'
+]
 
 @description('Virtual Network Subnet Name')
 param vNetSubnetName string = 'default'
@@ -59,11 +62,14 @@ param vNetSubnetIPAddressPrefix string = '10.1.0.0/24'
 //----------------------------------------------------------------------
 
 //Data Lake Parameters
-@description('Data Lake Storage Account Name')
-param dataLakeAccountName string = 'azdatalake${uniqueSuffix}'
+@description('Synapse Workspace Data Lake Storage Account Name')
+param workspaceDataLakeAccountName string = 'azwksdatalake${uniqueSuffix}'
 
-@description('Allow Shared Key Access')
-param allowSharedKeyAccess bool = false
+@description('Synapse Workspace Data Lake Storage Account Name')
+param rawDataLakeAccountName string = 'azrawdatalake${uniqueSuffix}'
+
+@description('Synapse Workspace Data Lake Storage Account Name')
+param curatedDataLakeAccountName string = 'azcurateddatalake${uniqueSuffix}'
 
 @description('Data Lake Raw Zone Container Name')
 param dataLakeRawZoneName string = 'raw'
@@ -74,9 +80,6 @@ param dataLakeTrustedZoneName string = 'trusted'
 @description('Data Lake Curated Zone Container Name')
 param dataLakeCuratedZoneName string = 'curated'
 
-@description('Data Lake Public Zone Container Name')
-param dataLakePublicZoneName string = 'public'
-
 @description('Data Lake Transient Zone Container Name')
 param dataLakeTransientZoneName string = 'transient'
 
@@ -84,9 +87,8 @@ param dataLakeTransientZoneName string = 'transient'
 param dataLakeSandpitZoneName string = 'sandpit'
 
 @description('Synapse Default Container Name')
-param synapseDefaultContainerName string = 'system'
+param synapseDefaultContainerName string = synapseWorkspaceName
 //----------------------------------------------------------------------
-
 
 //Synapse Workspace Parameters
 @description('Synapse Workspace Name')
@@ -96,7 +98,7 @@ param synapseWorkspaceName string = 'azsynapsewks${uniqueSuffix}'
 param synapseSqlAdminUserName string = 'azsynapseadmin'
 
 @description('SQL Admin User Name')
-param synapseSqlAdminPassword string = 'P@ssw0rd123!'
+param synapseSqlAdminPassword string
 
 @description('Synapse Managed Resource Group Name')
 param synapseManagedRGName string = '${synapseWorkspaceName}-mrg'
@@ -134,6 +136,16 @@ param synapseADXPoolName string = 'adxpool${uniqueSuffix}'
 @description('ADX Database Name')
 param synapseADXDatabaseName string = 'ADXDB'
 
+@description('ADX Pool Enable Auto-Scale')
+param synapseADXPoolEnableAutoScale bool = false
+
+@description('ADX Pool Minimum Size')
+param synapseADXPoolMinSize int = 2
+
+@description('ADX Pool Maximum Size')
+param synapseADXPoolMaxSize int = 2
+
+
 //----------------------------------------------------------------------
 
 //Synapse Private Link Hub Parameters
@@ -168,7 +180,6 @@ param azureMLAppInsightsName string = 'azmlappinsights${uniqueSuffix}'
 @description('Azure Machine Learning Container Registry Name')
 param azureMLContainerRegistryName string = 'azmlcontainerreg${uniqueSuffix}'
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //Azure Data Share Parameters
@@ -200,6 +211,15 @@ param eventHubSku string = 'Standard'
 param eventHubPartitionCount int = 1
 //----------------------------------------------------------------------
 
+//Azure IoT Hub Parameters
+@description('Azure IoTHub Name')
+param iotHubName string = 'aziothub${uniqueSuffix}'
+@description('Azure IoTHub SKU')
+param iotHubSku string = 'F1' //Free
+
+//----------------------------------------------------------------------
+
+
 //Stream Analytics Job Parameters
 @description('Azure Stream Analytics Job Name')
 param streamAnalyticsJobName string = 'azstreamjob${uniqueSuffix}'
@@ -211,215 +231,97 @@ param streamAnalyticsJobSku string = 'Standard'
 // Variables
 //********************************************************
 
-var azureRBACStorageBlobDataReaderRoleID = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1' //Storage Blob Data Reader Role
-var azureRBACContributorRoleID = 'b24988ac-6180-42a0-ab88-20f7382dd24c' //Contributor
-var azureRBACOwnerRoleID = '8e3af657-a8ff-443c-a75c-2fe8c4bcb635' //Owner
 var deploymentScriptUAMIName = toLower('${resourceGroup().name}-uami')
+//Data Lake zone containers
+var rawDataLakeZoneContainerNames = [
+  dataLakeTransientZoneName
+  dataLakeRawZoneName
+]
 
-
-var vNetID = ctrlNewOrExistingVNet == 'new' ? r_vNet.id : resourceId(subscription().subscriptionId,existingVNetResourceGroupName, 'Microsoft.Network/virtualNetworks',vNetName)
-var subnetID = ctrlNewOrExistingVNet == 'new' ? r_subNet.id : '${vNetID}/subnets/${vNetSubnetName}'
+var curatedDataLakeZoneContainerNames = [
+  dataLakeTrustedZoneName
+  dataLakeCuratedZoneName
+]
 
 //********************************************************
-// Shared Resources
+// Platform Services 
 //********************************************************
 
-//User-Assignment Managed Identity used to execute deployment scripts
-resource r_deploymentScriptUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' = if(ctrlPostDeployScript == true) {
-  name: deploymentScriptUAMIName
-  location: resourceLocation
-}
-
-//vNet created for network protected environments (deploymentMode == 'vNet')
-resource r_vNet 'Microsoft.Network/virtualNetworks@2020-11-01' = if(deploymentMode == 'vNet' && ctrlNewOrExistingVNet == 'new'){
-  name:vNetName
-  location: resourceLocation
-  properties:{
-    addressSpace:{
-      addressPrefixes: vNetIPAddressPrefixes
-    }
-  }
-}
-
-resource r_subNet 'Microsoft.Network/virtualNetworks/subnets@2020-11-01' = if(deploymentMode == 'vNet' && ctrlNewOrExistingVNet == 'new') {
-  name: vNetSubnetName
-  parent: r_vNet
-  properties: {
-    addressPrefix: vNetSubnetIPAddressPrefix
-    privateEndpointNetworkPolicies: 'Disabled'
-    privateLinkServiceNetworkPolicies:'Enabled'
-  }
-}
-
-//Key Vault
-resource r_keyVault 'Microsoft.KeyVault/vaults@2021-04-01-preview' = {
-  name: keyVaultName
-  location: resourceLocation
-  properties:{
-    tenantId: subscription().tenantId
-    enabledForDeployment:true
-    enableSoftDelete:true
-    sku:{
-      name:'standard'
-      family:'A'
-    }
-    networkAcls: {
-      defaultAction: (deploymentMode == 'vNet')? 'Deny' : 'Allow'
-      bypass:'AzureServices'
-    }
-    accessPolicies:[
-      //Access Policy to allow Synapse to Get and List Secrets
-      //https://docs.microsoft.com/en-us/azure/data-factory/how-to-use-azure-key-vault-secrets-pipeline-activities
-      {
-        objectId: m_CoreServicesDeploy.outputs.synapseWorkspaceIdentityPrincipalID
-        tenantId: subscription().tenantId
-        permissions: {
-          secrets: [
-            'get'
-            'list'
-          ]
-        }
-      }
-      //Access Policy to allow Deployment Script UAMI to Get, Set and List Secrets
-      //https://docs.microsoft.com/en-us/azure/purview/manage-credentials#grant-the-purview-managed-identity-access-to-your-azure-key-vault
-      {
-        objectId: r_deploymentScriptUAMI.properties.principalId
-        tenantId: subscription().tenantId
-        permissions: {
-          secrets: [
-            'get'
-            'list'
-            'set'
-          ]
-        }
-      }
-      
-    ]
-  }
-
-  resource r_PurviewAccessPolicy 'accessPolicies' = if (ctrlDeployPurview == true) {
-    name: 'add'
-    properties:{
-      accessPolicies: [
-        //Access Policy to allow Purview to Get and List Secrets
-        //https://docs.microsoft.com/en-us/azure/purview/manage-credentials#grant-the-purview-managed-identity-access-to-your-azure-key-vault
-        {
-          objectId: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewIdentityPrincipalID : ''
-          tenantId: subscription().tenantId
-          permissions: {
-            secrets: [
-              'get'
-              'list'
-            ]
-          }
-        }
-      ]
-    }
-  }
-}
-
-//Private DNS Zones required for Synapse Private Link: privatelink.vaultcore.azure.net
-//Required for KeyVault
-resource r_privateDNSZoneKeyVault 'Microsoft.Network/privateDnsZones@2020-06-01' existing = {
-  name: 'privatelink.vaultcore.azure.net'
-}
-
-module m_keyVaultPrivateLink './modules/PrivateEndpoint.bicep' = if(deploymentMode == 'vNet') {
-  name: 'KeyVaultPrivateLink'
+//Deploy required platform services
+module m_PlatformServicesDeploy 'modules/PlatformServicesDeploy.bicep' = {
+  name: 'PlatformServicesDeploy'
   params: {
-    groupID: 'vault'
-    privateEndpoitName: r_keyVault.name
-    privateLinkServiceId: r_keyVault.id
+    networkIsolationMode: networkIsolationMode
+    deploymentScriptUAMIName: deploymentScriptUAMIName
+    keyVaultName: keyVaultName 
     resourceLocation: resourceLocation
-    subnetID: subnetID
-    deployDNSZoneGroup:ctrlDeployPrivateDNSZones
-    privateDNSZoneConfigs: [
-      {
-        name:'privatelink-vaultcore-azure-net'
-        properties:{
-          privateDnsZoneId: r_privateDNSZoneKeyVault.id
-        }
-      }
-    ]
-  }
-}
-
-//********************************************************
-// Modules
-//********************************************************
-
-//Deploy Private DNS Zones required to suppport Private Endpoints
-module m_DeployPrivateDNSZones 'modules/PrivateDNSZonesDeploy.bicep' = if (deploymentMode == 'vNet' && ctrlDeployPrivateDNSZones == true){
-  name: 'DeployPrivateDNSZones'
-  params: {
-    vNetID: vNetID
+    ctrlNewOrExistingVNet: ctrlNewOrExistingVNet
+    existingVNetResourceGroupName: existingVNetResourceGroupName
+    vNetIPAddressPrefixes: vNetIPAddressPrefixes
+    vNetSubnetIPAddressPrefix: vNetSubnetIPAddressPrefix
+    vNetSubnetName: vNetSubnetName
     vNetName: vNetName
-    ctrlDeployAI: ctrlDeployAI
-    ctrlDeployPurview: ctrlDeployPurview
-    ctrlDeployStreaming: ctrlDeployStreaming
   }
 }
 
 //Deploy Core Services: Data Lake Account, Synapse Workspace and Key Vault.
-module m_CoreServicesDeploy 'modules/CoreServicesDeploy.bicep' = {
-  name: 'CoreServicesDeploy'
+module m_SynapseDeploy 'modules/SynapseDeploy.bicep' = {
+  name: 'SynapseDeploy'
+  dependsOn:[
+    m_PurviewDeploy
+  ]
   params: {
-    deploymentMode: deploymentMode
+    networkIsolationMode: networkIsolationMode
     resourceLocation: resourceLocation
-    allowSharedKeyAccess: allowSharedKeyAccess
-    ctrlAllowStoragePublicContainer: ctrlAllowStoragePublicContainer
-    ctrlDeployPrivateDNSZones: ctrlDeployPrivateDNSZones
     ctrlDeploySynapseSQLPool: ctrlDeploySynapseSQLPool
     ctrlDeploySynapseSparkPool: ctrlDeploySynapseSparkPool
     ctrlDeploySynapseADXPool: ctrlDeploySynapseADXPool
-    dataLakeAccountName: dataLakeAccountName
-    dataLakeCuratedZoneName: dataLakeCuratedZoneName
-    dataLakePublicZoneName: dataLakePublicZoneName
-    dataLakeRawZoneName: dataLakeRawZoneName
+    workspaceDataLakeAccountName: workspaceDataLakeAccountName
     dataLakeSandpitZoneName: dataLakeSandpitZoneName
-    dataLakeTransientZoneName: dataLakeTransientZoneName
-    dataLakeTrustedZoneName: dataLakeTrustedZoneName
     synapseDefaultContainerName: synapseDefaultContainerName
     purviewAccountID: (ctrlDeployPurview == true)? m_PurviewDeploy.outputs.purviewAccountID : ''
     synapseDedicatedSQLPoolName: synapseDedicatedSQLPoolName
     synapseManagedRGName: synapseManagedRGName
-    synapsePrivateLinkHubName: synapsePrivateLinkHubName
     synapseSparkPoolMaxNodeCount: synapseSparkPoolMaxNodeCount
     synapseSparkPoolMinNodeCount: synapseSparkPoolMinNodeCount
     synapseSparkPoolName: synapseSparkPoolName
     synapseSparkPoolNodeSize: synapseSparkPoolNodeSize
     synapseADXPoolName: synapseADXPoolName
     synapseADXDatabaseName: synapseADXDatabaseName
+    synapseADXPoolMinSize: synapseADXPoolMinSize
+    synapseADXPoolMaxSize:synapseADXPoolMaxSize
+    synapseADXPoolEnableAutoScale: synapseADXPoolEnableAutoScale
     synapseSqlAdminPassword: synapseSqlAdminPassword
     synapseSqlAdminUserName: synapseSqlAdminUserName
     synapseSQLPoolSKU: synapseSQLPoolSKU
     synapseWorkspaceName: synapseWorkspaceName
-    uamiPrincipalID: r_deploymentScriptUAMI.properties.principalId
-    vNetSubnetID: subnetID
   }
 }
 
+//********************************************************
+// PURVIEW DEPLOY
+//********************************************************
 
 //Deploy Purview Account
 module m_PurviewDeploy 'modules/PurviewDeploy.bicep' = if (ctrlDeployPurview == true){
   name: 'PurviewDeploy'
   params: {
-    deploymentMode: deploymentMode
-    ctrlDeployPrivateDNSZones: ctrlDeployPrivateDNSZones
     purviewAccountName: purviewAccountName
     purviewManagedRGName: purviewManagedRGName
     resourceLocation: resourceLocation
-    subnetID: subnetID
-    uamiPrincipalID: r_deploymentScriptUAMI.properties.principalId
   }
 }
 
+
+//*********************************************************************
+// AI SERVICES DEPLOY: AZURE ML, ANOMALY DETECTOR AND TEXT ANALYTICS
+//*********************************************************************
 
 //Deploy AI Services: Azure Machine Learning Workspace (and dependent services) and Cognitive Services
 module m_AIServicesDeploy 'modules/AIServicesDeploy.bicep' = if(ctrlDeployAI == true) {
   name: 'AIServicesDeploy'
   dependsOn: [
-    m_CoreServicesDeploy
+    m_PlatformServicesDeploy
   ]
   params: {
     anomalyDetectorAccountName: anomalyDetectorName
@@ -428,17 +330,15 @@ module m_AIServicesDeploy 'modules/AIServicesDeploy.bicep' = if(ctrlDeployAI == 
     azureMLStorageAccountName: azureMLStorageAccountName
     azureMLWorkspaceName: azureMLWorkspaceName
     textAnalyticsAccountName: textAnalyticsAccountName
-    keyVaultName: r_keyVault.name
+    keyVaultID: m_PlatformServicesDeploy.outputs.keyVaultID
     resourceLocation: resourceLocation
-    synapseSparkPoolID: m_CoreServicesDeploy.outputs.synapseWorkspaceSparkID
-    ctrlSynapseDeploySparkPool: ctrlDeploySynapseSQLPool
-    synapseWorkspaceID: m_CoreServicesDeploy.outputs.synapseWorkspaceID
-    synapseWorkspaceName: m_CoreServicesDeploy.outputs.synapseWorkspaceName
-    deploymentMode: deploymentMode
-    vNetSubnetID: subnetID
-    ctrlDeployPrivateDNSZones: ctrlDeployPrivateDNSZones
+    networkIsolationMode: networkIsolationMode
   }
 }
+
+//********************************************************
+// DATA SHARE DEPLOY
+//********************************************************
 
 module m_DataShareDeploy 'modules/DataShareDeploy.bicep' = if(ctrlDeployDataShare == true){
   name: 'DataShareDeploy'
@@ -449,118 +349,187 @@ module m_DataShareDeploy 'modules/DataShareDeploy.bicep' = if(ctrlDeployDataShar
   }
 }
 
+//********************************************************
+// STREAMING SERVICES DEPLOY
+//********************************************************
+
 module m_StreamingServicesDeploy 'modules/StreamingServicesDeploy.bicep' = if(ctrlDeployStreaming == true) {
   name: 'StreamingServicesDeploy'
   params: {
-    dataLakeStorageAccountID: m_CoreServicesDeploy.outputs.dataLakeStorageAccountID 
-    eventHubName: eventHubName
+    ctrlStreamIngestionService: ctrlStreamIngestionService
     eventHubNamespaceName: eventHubNamespaceName
-    eventHubPartitionCount: eventHubPartitionCount
     eventHubSku: eventHubSku
+    iotHubName: iotHubName
+    iotHubSku: iotHubSku
     resourceLocation: resourceLocation
     streamAnalyticsJobName: streamAnalyticsJobName
     streamAnalyticsJobSku: streamAnalyticsJobSku
-    ctrlDeployPrivateDNSZones: ctrlDeployPrivateDNSZones
-    deploymentMode: deploymentMode
-    vNetSubnetID: subnetID
+    networkIsolationMode: networkIsolationMode
+    subNetID: m_PlatformServicesDeploy.outputs.subnetID
+  }
+}
+
+//********************************************************
+// RAW AND CURATED DATA LAKES DEPLOY
+//********************************************************
+
+module m_DataLakeDeploy 'modules/DataLakeDeploy.bicep' = {
+  name: 'DataLakeDeploy'
+  dependsOn:[
+    m_SynapseDeploy
+    m_DataShareDeploy
+    m_PurviewDeploy
+    m_StreamingServicesDeploy
+    m_AIServicesDeploy
+  ]
+  params: {
+    curatedDataLakeAccountName: curatedDataLakeAccountName
+    curatedDataLakeZoneContainerNames: curatedDataLakeZoneContainerNames
+    rawDataLakeZoneContainerNames: rawDataLakeZoneContainerNames
+    dataShareResourceID: ctrlDeployDataShare ? m_DataShareDeploy.outputs.dataShareAccountID : ''
+    networkIsolationMode: networkIsolationMode
+    purviewAccountResourceID: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAccountID : ''
+    rawDataLakeAccountName: rawDataLakeAccountName
+    resourceLocation: resourceLocation
+    streamAnalyticsJobResourceID: ctrlDeployStreaming ? m_StreamingServicesDeploy.outputs.streamAnalyticsJobID : ''
+    synapseWorkspaceResourceID: m_SynapseDeploy.outputs.synapseWorkspaceID
+    azureMLWorkspaceResourceID: ctrlDeployAI? m_AIServicesDeploy.outputs.azureMLWorkspaceID : ''
+    anomalyDetectorAccountResourceID: ctrlDeployAI? m_AIServicesDeploy.outputs.anomalyDetectorAccountID : ''
+    languageServiceAccountResourceID: ctrlDeployAI? m_AIServicesDeploy.outputs.textAnalyticsAccountID : ''
+    ctrlDeployStreaming: ctrlDeployStreaming
+    ctrlStreamIngestionService: ctrlStreamIngestionService
+    iotHubResourceID: ctrlDeployStreaming ? m_StreamingServicesDeploy.outputs.iotHubID : ''
+  }
+}
+
+//********************************************************
+// DEPENDENT RESOURCES DEPLOY
+//********************************************************
+
+module m_ServiceConnectionsDeploy 'modules/ServiceConnectionsDeploy.bicep' = {
+  name: 'ServiceConnectionsDeploy'
+  dependsOn:[
+    m_PlatformServicesDeploy
+    m_SynapseDeploy
+    m_PurviewDeploy
+    m_DataLakeDeploy
+    m_AIServicesDeploy
+    m_StreamingServicesDeploy
+  ]
+  params: {
+    ctrlDeployPurview: ctrlDeployPurview
+    ctrlDeployAI:ctrlDeployAI
+    ctrlDeployStreaming: ctrlDeployStreaming
+    ctrlStreamIngestionService: ctrlStreamIngestionService
+    ctrlSynapseDeploySparkPool: ctrlDeploySynapseSparkPool
+    keyVaultName: m_PlatformServicesDeploy.outputs.keyVaultName
+    purviewIdentityPrincipalID: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewIdentityPrincipalID :''
+    synapseWorkspaceIdentityPrincipalID: m_SynapseDeploy.outputs.synapseWorkspaceIdentityPrincipalID
+    azureMLWorkspaceName: ctrlDeployAI ? m_AIServicesDeploy.outputs.azureMLWorkspaceName : azureMLWorkspaceName
+    curatedDataLakeAccountName: m_DataLakeDeploy.outputs.curatedDataLakeStorageAccountName
+    rawDataLakeAccountName: m_DataLakeDeploy.outputs.rawDataLakeStorageAccountName
+    curatedDataLakeZoneContainerNames: curatedDataLakeZoneContainerNames
+    rawDataLakeZoneContainerNames: rawDataLakeZoneContainerNames
+    eventHubName: eventHubName
+    eventHubNamespaceName: eventHubNamespaceName
+    eventHubPartitionCount: eventHubPartitionCount
+    rawDataLakeAccountID: m_DataLakeDeploy.outputs.rawDataLakeStorageAccountID
+    anomalyDetectorAccountName:anomalyDetectorName
+    resourceLocation: resourceLocation
+    synapseWorkspaceID: m_SynapseDeploy.outputs.synapseWorkspaceID
+    synapseWorkspaceName: m_SynapseDeploy.outputs.synapseWorkspaceName
+    synapseSparkPoolID: ctrlDeploySynapseSparkPool ? m_SynapseDeploy.outputs.synapseWorkspaceSparkID : ''
+    synapseSparkPoolName: ctrlDeploySynapseSparkPool ? m_SynapseDeploy.outputs.synapseWorkspaceSparkName : ''
+    textAnalyticsAccountName:  textAnalyticsAccountName
+    uamiPrincipalID: m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID
   }
 }
 
 //********************************************************
 // RBAC Role Assignments
 //********************************************************
-resource r_dataLakeStorageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' existing = {
-  name: dataLakeAccountName
-}
 
-resource r_azureMLWorkspace 'Microsoft.MachineLearningServices/workspaces@2021-04-01' existing = {
-  name: azureMLWorkspaceName
-}
-
-resource r_synapseWorkspace 'Microsoft.Synapse/workspaces@2021-06-01-preview' existing = {
-  name: synapseWorkspaceName
-}
-
-//Assign Owner Role to UAMI in the Synapse Workspace. UAMI needs to be Owner so it can assign itself as Synapse Admin and create resources in the Data Plane.
-resource r_synapseWorkspaceOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(r_synapseWorkspace.name, 'DeploymentScriptUAMI')
-  dependsOn: [
-    m_CoreServicesDeploy
-  ]
-  scope: r_synapseWorkspace
-  properties:{
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACOwnerRoleID)
-    principalId: r_deploymentScriptUAMI.properties.principalId
-    principalType:'ServicePrincipal'
-  }
-}
-
-//Assign Storage Blob Reader Role to Purview MSI in the Resource Group as per https://docs.microsoft.com/en-us/azure/purview/register-scan-synapse-workspace
-resource r_purviewRGStorageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = if (ctrlDeployPurview == true) {
-  name: guid(resourceGroup().name, purviewAccountName, 'Storage Blob Reader')
+module m_RBACRoleAssignment 'modules/AzureRBACDeploy.bicep' = {
+  name: 'RBACRoleAssignmentDeploy'
   dependsOn:[
+    m_PlatformServicesDeploy
+    m_SynapseDeploy
     m_PurviewDeploy
+    m_DataLakeDeploy
+    m_AIServicesDeploy
+    m_StreamingServicesDeploy
+    m_ServiceConnectionsDeploy
   ]
-  properties:{
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
-    principalId: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewIdentityPrincipalID : ''
-    principalType:'ServicePrincipal'
+  params: {
+    ctrlDeployDataShare: ctrlDeployDataShare
+    dataShareAccountPrincipalID: ctrlDeployDataShare? m_DataShareDeploy.outputs.dataShareAccountPrincipalID : ''
+    ctrlDeployStreaming: ctrlDeployStreaming
+    streamAnalyticsIdentityPrincipalID: ctrlDeployStreaming? m_StreamingServicesDeploy.outputs.streamAnalyticsIdentityPrincipalID : ''
+    ctrlDeployPurview: ctrlDeployPurview
+    purviewIdentityPrincipalID: ctrlDeployPurview? m_PurviewDeploy.outputs.purviewIdentityPrincipalID : ''
+    ctrlDeployAI: ctrlDeployAI
+    azureMLWorkspaceName: ctrlDeployAI? m_AIServicesDeploy.outputs.azureMLWorkspaceName : ''
+    azureMLSynapseLinkedServicePrincipalID: ctrlDeployAI ? m_ServiceConnectionsDeploy.outputs.azureMLSynapseLinkedServicePrincipalID : ''
+    curatedDataLakeAccountName: curatedDataLakeAccountName
+    rawDataLakeAccountName: rawDataLakeAccountName
+    synapseWorkspaceName: m_SynapseDeploy.outputs.synapseWorkspaceName
+    synapseWorkspaceIdentityPrincipalID: m_SynapseDeploy.outputs.synapseWorkspaceIdentityPrincipalID
+    UAMIPrincipalID: m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID
+    iotHubPrincipalID: ctrlDeployStreaming? m_StreamingServicesDeploy.outputs.iotHubPrincipalID : ''
+    ctrlStreamingIngestionService: ctrlStreamIngestionService
+    purviewAccountName: purviewAccountName
   }
 }
 
-//Deployment script UAMI is set as Resource Group owner so it can have authorisation to perform post deployment tasks
-resource r_deploymentScriptUAMIRGOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(resourceGroup().name, deploymentScriptUAMIName, 'Owner')
-  properties:{
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACOwnerRoleID)
-    principalId: r_deploymentScriptUAMI.properties.principalId
-    principalType:'ServicePrincipal'
-  }
-}
-
-//Azure Synaspe MSI needs to have Contributor permissions in the Azure ML workspace.
-//https://docs.microsoft.com/en-us/azure/synapse-analytics/machine-learning/quickstart-integrate-azure-machine-learning#give-msi-permission-to-the-azure-ml-workspace
-resource r_synapseAzureMLContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = if(ctrlDeployAI == true) {
-  name: guid(synapseWorkspaceName, azureMLWorkspaceName, 'Contributor')
-  scope: r_azureMLWorkspace
+module m_VirtualNetworkIntegration 'modules/VirtualNetworkIntegrationDeploy.bicep' = if(networkIsolationMode == 'vNet') {
+  name: 'VirtualNetworkIntegration'
   dependsOn:[
+    m_PlatformServicesDeploy
+    m_SynapseDeploy
+    m_PurviewDeploy
     m_AIServicesDeploy
-    m_CoreServicesDeploy
+    m_StreamingServicesDeploy
+    m_DataLakeDeploy
   ]
-  properties:{
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACContributorRoleID)
-    principalId: m_CoreServicesDeploy.outputs.synapseWorkspaceIdentityPrincipalID
-    principalType:'ServicePrincipal'
-  }
-}
-
-//Assign Storage Blob Data Reader Role to Azure ML MSI in the Data Lake Account as per https://docs.microsoft.com/en-us/azure/machine-learning/how-to-identity-based-data-access
-resource r_azureMLStorageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = if(ctrlDeployAI == true) {
-  name: guid(r_dataLakeStorageAccount.name, azureMLWorkspaceName, 'Storage Blob Data Reader')
-  scope:r_dataLakeStorageAccount
-  dependsOn: [
-    m_CoreServicesDeploy
-    m_AIServicesDeploy
-  ]
-  properties:{
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
-    principalId: ctrlDeployAI ? m_AIServicesDeploy.outputs.azureMLSynapseLinkedServicePrincipalID : ''
-    principalType:'ServicePrincipal'
-  }
-}
-
-//Assign Storage Blob Data Reader Role to Azure Data Share in the Data Lake Account as per https://docs.microsoft.com/en-us/azure/data-share/concepts-roles-permissions
-resource r_azureDataShareStorageBlobDataReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = if (ctrlDeployDataShare == true) {
-  name: guid(r_dataLakeStorageAccount.name, dataShareAccountName, 'Storage Blob Data Reader')
-  scope:r_dataLakeStorageAccount
-  dependsOn: [
-    m_CoreServicesDeploy
-    m_DataShareDeploy
-  ]
-  properties:{
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
-    principalId: ctrlDeployDataShare ? m_DataShareDeploy.outputs.dataShareAccountPrincipalID : ''
-    principalType:'ServicePrincipal'
+  params: {
+    ctrlDeployAI: ctrlDeployAI
+    ctrlDeployPrivateDNSZones: ctrlDeployPrivateDNSZones
+    ctrlDeployPurview: ctrlDeployPurview
+    ctrlDeployStreaming: ctrlDeployStreaming
+    ctrlStreamIngestionService: ctrlStreamIngestionService
+    vNetName: vNetName
+    subnetID: m_PlatformServicesDeploy.outputs.subnetID
+    vNetID: m_PlatformServicesDeploy.outputs.vNetID
+    anomalyDetectorAccountID: ctrlDeployAI ? m_AIServicesDeploy.outputs.anomalyDetectorAccountID : ''
+    anomalyDetectorAccountName: ctrlDeployAI ? m_AIServicesDeploy.outputs.anomalyDetectorAccountName : ''
+    azureMLContainerRegistryID: ctrlDeployAI ? m_AIServicesDeploy.outputs.containerRegistryID : ''
+    azureMLContainerRegistryName: ctrlDeployAI ? m_AIServicesDeploy.outputs.containerRegistryName : ''
+    azureMLStorageAccountID: ctrlDeployAI ? m_AIServicesDeploy.outputs.storageAccountID : ''
+    azureMLStorageAccountName: ctrlDeployAI ? m_AIServicesDeploy.outputs.storageAccountName : ''
+    azureMLWorkspaceID: ctrlDeployAI ? m_AIServicesDeploy.outputs.azureMLWorkspaceID : ''
+    azureMLWorkspaceName: ctrlDeployAI ? m_AIServicesDeploy.outputs.azureMLWorkspaceName : ''
+    curatedDataLakeAccountID: m_DataLakeDeploy.outputs.curatedDataLakeStorageAccountID
+    curatedDataLakeAccountName: m_DataLakeDeploy.outputs.curatedDataLakeStorageAccountName
+    eventHubNamespaceID: ctrlDeployStreaming ? m_StreamingServicesDeploy.outputs.eventHubNamespaceID : ''
+    eventHubNamespaceName: ctrlDeployStreaming ? m_StreamingServicesDeploy.outputs.eventHubNamespaceName : ''
+    iotHubID: ctrlDeployStreaming ? m_StreamingServicesDeploy.outputs.iotHubID : ''
+    iotHubName: ctrlDeployStreaming ? m_StreamingServicesDeploy.outputs.iotHubName : ''
+    keyVaultID: m_PlatformServicesDeploy.outputs.keyVaultID
+    keyVaultName: m_PlatformServicesDeploy.outputs.keyVaultName
+    purviewAccountID: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAccountID : ''
+    purviewAccountName: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAccountName : ''
+    purviewManagedEventHubNamespaceID: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewManagedEventHubNamespaceID : ''
+    purviewManagedStorageAccountID: ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewManagedStorageAccountID : ''
+    rawDataLakeAccountID: m_DataLakeDeploy.outputs.rawDataLakeStorageAccountID
+    rawDataLakeAccountName: m_DataLakeDeploy.outputs.rawDataLakeStorageAccountName
+    resourceLocation: resourceLocation
+    synapsePrivateLinkHubName: synapsePrivateLinkHubName
+    synapseWorkspaceID: m_SynapseDeploy.outputs.synapseWorkspaceID
+    synapseWorkspaceName: m_SynapseDeploy.outputs.synapseWorkspaceName
+    textAnalyticsAccountID: ctrlDeployAI ? m_AIServicesDeploy.outputs.textAnalyticsAccountID : ''
+    textAnalyticsAccountName: ctrlDeployAI ? m_AIServicesDeploy.outputs.textAnalyticsAccountName : ''
+    workspaceDataLakeAccountID: m_SynapseDeploy.outputs.workspaceDataLakeAccountID
+    workspaceDataLakeAccountName: m_SynapseDeploy.outputs.workspaceDataLakeAccountName
   }
 }
 
@@ -568,66 +537,47 @@ resource r_azureDataShareStorageBlobDataReaderRoleAssignment 'Microsoft.Authoriz
 // Post Deployment Scripts
 //********************************************************
 
-//Synapse Deployment Script
-var synapsePostDeploymentPSScript = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvU3luYXBzZVBvc3REZXBsb3kucHMx'
-var azMLSynapseLinkedServiceIdentityID = ctrlDeployAI ? '-AzMLSynapseLinkedServiceIdentityID ${m_AIServicesDeploy.outputs.azureMLSynapseLinkedServicePrincipalID}' : ''
-var azMLWorkspaceName = ctrlDeployAI ? '-AzMLWorkspaceName ${azureMLWorkspaceName}' : ''
-var azTextAnalyticsParams = ctrlDeployAI ? '-TextAnalyticsAccountName ${textAnalyticsAccountName} -TextAnalyticsEndpoint ${m_AIServicesDeploy.outputs.textAnalyticsEndpoint}' : ''
-var azAnomalyDetectorParams = ctrlDeployAI ? '-AnomalyDetectorAccountName ${anomalyDetectorName} -AnomalyDetectorEndpoint ${m_AIServicesDeploy.outputs.anomalyDetectorEndpoint}' : ''
-
-resource r_synapsePostDeployScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name:'SynapsePostDeploymentScript-${deploymentDatetime}'
-  dependsOn: [
-    m_CoreServicesDeploy
-    m_AIServicesDeploy
-    r_deploymentScriptUAMIRGOwnerRoleAssignment
-    r_keyVault
-  ]
-  location:resourceLocation
-  kind:'AzurePowerShell'
-  identity:{
-    type:'UserAssigned'
-    userAssignedIdentities: {
-      '${r_deploymentScriptUAMI.id}': {}
-    }
-  }
-  properties:{
-    azPowerShellVersion:'6.2'
-    cleanupPreference:'OnSuccess'
-    retentionInterval: 'P1D'
-    timeout:'PT30M'
-    arguments: '-DeploymentMode ${deploymentMode} -ctrlDeployAI $${ctrlDeployAI} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceGroup().location} -WorkspaceName ${synapseWorkspaceName} -UAMIIdentityID ${r_deploymentScriptUAMI.properties.principalId} -KeyVaultName ${keyVaultName} -KeyVaultID ${r_keyVault.id} ${azMLSynapseLinkedServiceIdentityID} -DataLakeStorageAccountName ${dataLakeAccountName} -DataLakeStorageAccountID ${m_CoreServicesDeploy.outputs.dataLakeStorageAccountID} ${azMLWorkspaceName} ${azTextAnalyticsParams} ${azAnomalyDetectorParams}'
-    primaryScriptUri: base64ToString(synapsePostDeploymentPSScript)
-  }
+resource r_deploymentScriptUAMI 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
+  name: deploymentScriptUAMIName
 }
 
-//Purview Deployment Script
-var purviewPostDeploymentPSScript = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvUHVydmlld1Bvc3REZXBsb3kucHMx'
-var dataShareIdentityID = ctrlDeployDataShare ? '-DataShareIdentityID ${m_DataShareDeploy.outputs.dataShareAccountPrincipalID}' : ''
+//Synapse Deployment Script
+var synapsePSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvU3luYXBzZVBvc3REZXBsb3kucHMx'
 
-resource r_purviewPostDeployScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = if(ctrlDeployPurview == true){
-  name:'PurviewPostDeploymentScript-${deploymentDatetime}'
+var azMLSynapseLinkedServiceIdentityID = ctrlDeployAI ? '-AzMLSynapseLinkedServiceIdentityID ${m_ServiceConnectionsDeploy.outputs.azureMLSynapseLinkedServicePrincipalID}' : ''
+var azMLWorkspaceName = ctrlDeployAI ? '-AzMLWorkspaceName ${azureMLWorkspaceName}' : ''
+var azTextAnalyticsParams = ctrlDeployAI ? '-TextAnalyticsAccountID ${m_AIServicesDeploy.outputs.textAnalyticsAccountID} -TextAnalyticsAccountName ${textAnalyticsAccountName} -TextAnalyticsEndpoint ${m_AIServicesDeploy.outputs.textAnalyticsEndpoint}' : ''
+var azAnomalyDetectorParams = ctrlDeployAI ? '-AnomalyDetectorAccountID ${m_AIServicesDeploy.outputs.anomalyDetectorAccountID} -AnomalyDetectorAccountName ${anomalyDetectorName} -AnomalyDetectorEndpoint ${m_AIServicesDeploy.outputs.anomalyDetectorEndpoint}' : ''
+var datalakeAccountSynapseParams = '-WorkspaceDataLakeAccountName ${workspaceDataLakeAccountName} -WorkspaceDataLakeAccountID ${m_SynapseDeploy.outputs.workspaceDataLakeAccountID} -RawDataLakeAccountName ${rawDataLakeAccountName} -RawDataLakeAccountID ${m_DataLakeDeploy.outputs.rawDataLakeStorageAccountID} -CuratedDataLakeAccountName ${curatedDataLakeAccountName} -CuratedDataLakeAccountID ${m_DataLakeDeploy.outputs.curatedDataLakeStorageAccountID}'
+var synapseWorkspaceParams = '-SynapseWorkspaceName ${synapseWorkspaceName} -SynapseWorkspaceID ${m_SynapseDeploy.outputs.synapseWorkspaceID}'
+var synapseScriptArguments = '-NetworkIsolationMode ${networkIsolationMode} -ctrlDeployAI $${ctrlDeployAI} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceGroup().location} -UAMIIdentityID ${m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID} -KeyVaultName ${keyVaultName} -KeyVaultID ${m_PlatformServicesDeploy.outputs.keyVaultID} ${synapseWorkspaceParams} ${azMLSynapseLinkedServiceIdentityID} ${datalakeAccountSynapseParams} ${azMLWorkspaceName} ${azTextAnalyticsParams} ${azAnomalyDetectorParams}'
+
+//Purview Deployment Script
+var purviewPSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvUHVydmlld1Bvc3REZXBsb3kucHMx'
+var dataShareIdentityID = ctrlDeployDataShare ? '-DataShareIdentityID ${m_DataShareDeploy.outputs.dataShareAccountPrincipalID}' : ''
+var datalakeAccountPurviewParams = '-WorkspaceDataLakeAccountName ${workspaceDataLakeAccountName} -RawDataLakeAccountName ${rawDataLakeAccountName} -CuratedDataLakeAccountName ${curatedDataLakeAccountName}'
+var purviewScriptArguments = '-PurviewAccountID ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAccountID : ''} -PurviewAccountName ${purviewAccountName} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -UAMIIdentityID ${m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID} -ScanEndpoint ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewScanEndpoint : ''} -APIVersion ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAPIVersion : ''} -SynapseWorkspaceName ${m_SynapseDeploy.outputs.synapseWorkspaceName} -SynapseWorkspaceIdentityID ${m_SynapseDeploy.outputs.synapseWorkspaceIdentityPrincipalID} -KeyVaultName ${keyVaultName} -KeyVaultID ${m_PlatformServicesDeploy.outputs.keyVaultID} ${datalakeAccountPurviewParams} ${dataShareIdentityID} -NetworkIsolationMode ${networkIsolationMode}'
+
+//CleanUp Deployment Script
+var cleanUpPSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZhYnJhZ2FNUy9BenVyZUFuYWx5dGljc0UyRS9tYXN0ZXIvRGVwbG95L3NjcmlwdHMvQ2xlYW5VcFBvc3REZXBsb3kucHMx'
+var cleanUpScriptArguments = '-UAMIResourceID ${r_deploymentScriptUAMI.id}'
+
+module m_PostDeploymentScripts 'modules/PostDeploymentScripts.bicep' = {
+  name: 'PostDeploymentScripts'
   dependsOn: [
-    m_PurviewDeploy
-    m_CoreServicesDeploy
-    r_deploymentScriptUAMIRGOwnerRoleAssignment
-    r_keyVault
+    m_RBACRoleAssignment
   ]
-  location:resourceLocation
-  kind:'AzurePowerShell'
-  identity:{
-    type:'UserAssigned'
-    userAssignedIdentities: {
-      '${r_deploymentScriptUAMI.id}': {}
-    }
-  }
-  properties:{
-    azPowerShellVersion:'6.2'
-    cleanupPreference:'OnSuccess'
-    retentionInterval: 'P1D'
-    timeout:'PT30M'
-    arguments: '-PurviewAccountName ${purviewAccountName} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -UAMIIdentityID ${r_deploymentScriptUAMI.properties.principalId} -ScanEndpoint ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewScanEndpoint : ''} -APIVersion ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAPIVersion : ''} -SynapseWorkspaceName ${m_CoreServicesDeploy.outputs.synapseWorkspaceName} -KeyVaultName ${keyVaultName} -KeyVaultID ${r_keyVault.id} -DataLakeAccountName ${m_CoreServicesDeploy.outputs.dataLakeStorageAccountName} ${dataShareIdentityID}'
-    primaryScriptUri: base64ToString(purviewPostDeploymentPSScript)
+  params: {
+    cleanUpPSScriptLocation: cleanUpPSScriptLocation
+    cleanUpScriptArguments: cleanUpScriptArguments
+    ctrlDeployPurview: ctrlDeployPurview
+    deploymentDatetime: deploymentDatetime
+    deploymentScriptUAMIId: m_PlatformServicesDeploy.outputs.deploymentScriptUAMIID
+    purviewPSScriptLocation: purviewPSScriptLocation
+    purviewScriptArguments: purviewScriptArguments
+    resourceLocation: resourceLocation
+    synapsePSScriptLocation: synapsePSScriptLocation
+    synapseScriptArguments: synapseScriptArguments
   }
 }
 

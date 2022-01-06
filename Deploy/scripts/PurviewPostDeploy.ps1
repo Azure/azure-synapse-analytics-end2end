@@ -1,4 +1,5 @@
 param(
+  [string] $PurviewAccountID,
   [string] $PurviewAccountName,
   [string] $SubscriptionId,
   [string] $ResourceGroupName,
@@ -10,9 +11,53 @@ param(
   [AllowEmptyString()]
   [Parameter(Mandatory=$false)]
   [string] $DataShareIdentityID,
-  [string] $DataLakeAccountName,
-  [string] $SynapseWorkspaceName
+  [string] $WorkspaceDataLakeAccountName,
+  [string] $RawDataLakeAccountName,
+  [string] $CuratedDataLakeAccountName,
+  [string] $SynapseWorkspaceName,
+  [string] $SynapseWorkspaceIdentityID,
+  [string] $NetworkIsolationMode
 )
+
+#------------------------------------------------------------------------------------------------------------
+# FUNCTION DEFINITIONS
+#------------------------------------------------------------------------------------------------------------
+
+function Set-PurviewControlPlaneOperation{
+  param (
+    [string] $PurviewAccountID,
+    [string] $HttpRequestBody
+  )
+  
+  $uri = "https://management.azure.com$PurviewAccountID`?api-version=2021-07-01"
+  $token = (Get-AzAccessToken -Resource "https://management.azure.com").Token
+  $headers = @{ Authorization = "Bearer $token" }
+
+  $retrycount = 1
+  $completed = $false
+  $secondsDelay = 30
+
+  while (-not $completed) {
+    try {
+      Invoke-RestMethod -Method Patch -ContentType "application/json" -Uri $uri -Headers $headers -Body $HttpRequestBody -ErrorAction Stop
+      Write-Host "Control plane operation completed successfully."
+      $completed = $true
+    }
+    catch {
+      if ($retrycount -ge $retries) {
+          Write-Host "Control plane operation failed the maximum number of $retryCount times."
+          Write-Warning $Error[0]
+          throw
+      } else {
+          Write-Host "Control plane operation failed $retryCount time(s). Retrying in $secondsDelay seconds."
+          Write-Warning $Error[0]
+          Start-Sleep $secondsDelay
+          $retrycount++
+      }
+    }
+  }
+}
+
 
 $retries = 10
 $secondsDelay = 10
@@ -87,10 +132,14 @@ while (-not $completed) {
         if (-not ($attributeRule.dnfCondition[0][0].attributeValueIncludedIn -contains $UAMIIdentityID)) {
           $attributeRule.dnfCondition[0][0].attributeValueIncludedIn += $UAMIIdentityID  
         }
-      #Add Data Share PrincipalID to Data Curator Role.
-      } elseif ($attributeRule.id -like "*data-curator*" -and -not ([string]::IsNullOrEmpty($DataShareIdentityID))) {
-        if (-not ($attributeRule.dnfCondition[0][0].attributeValueIncludedIn -contains $DataShareIdentityID)) {
+      
+      } elseif ($attributeRule.id -like "*data-curator*") {
+        #Add Data Share PrincipalID to Data Curator Role.
+        if (-not ([string]::IsNullOrEmpty($DataShareIdentityID)) -and -not ($attributeRule.dnfCondition[0][0].attributeValueIncludedIn -contains $DataShareIdentityID)) {
           $attributeRule.dnfCondition[0][0].attributeValueIncludedIn += $DataShareIdentityID  
+        }
+        if (-not ([string]::IsNullOrEmpty($SynapseWorkspaceIdentityID)) -and -not ($attributeRule.dnfCondition[0][0].attributeValueIncludedIn -contains $SynapseWorkspaceIdentityID)) {
+          $attributeRule.dnfCondition[0][0].attributeValueIncludedIn += $SynapseWorkspaceIdentityID
         }
       }
     }
@@ -158,46 +207,52 @@ while (-not $completed) {
 
 Write-Host "Registering Azure Data Lake data source..."
 
-$uri = $ScanEndpoint + "/datasources/$DataLakeAccountName`?api-version=2018-12-01-preview"
-
 #------------------------------------------------------------------------------------------------------------
 # REGISTER DATA SOURCES
 #------------------------------------------------------------------------------------------------------------
 
-#Register Azure Data Lake data source
-$body = "{
-  ""kind"": ""AdlsGen2"",
-  ""name"": ""$DataLakeAccountName"",
-  ""properties"": {
-      ""endpoint"": ""https://$DataLakeAccountName.dfs.core.windows.net/"",
-      ""collection"": {
-        ""type"": ""CollectionReference"",
-        ""referenceName"": ""$PurviewAccountName""
+#Register Azure Data Lake data sources
+$dataLakeAccountNames = $WorkspaceDataLakeAccountName, $RawDataLakeAccountName, $CuratedDataLakeAccountName
+
+foreach ($dataLakeAccountName in $dataLakeAccountNames) {
+  $uri = $ScanEndpoint + "/datasources/$dataLakeAccountName`?api-version=2018-12-01-preview"
+
+  $body = "{
+    ""kind"": ""AdlsGen2"",
+    ""name"": ""$)"",
+    ""properties"": {
+        ""endpoint"": ""https://$dataLakeAccountName.dfs.core.windows.net/"",
+        ""collection"": {
+          ""type"": ""CollectionReference"",
+          ""referenceName"": ""$PurviewAccountName""
+        }
+    }
+  }"
+
+  $retrycount = 1
+  $completed = $false
+
+  while (-not $completed) {
+    try {
+      Invoke-RestMethod -Method Put -ContentType "application/json" -Uri $uri -Headers $headers -Body $body -ErrorAction Stop
+      Write-Host "Azure Data Lake source registered successfully."
+      $completed = $true
+    }
+    catch {
+      if ($retrycount -ge $retries) {
+          Write-Host "Azure Data Lake source registration failed the maximum number of $retryCount times."
+          throw
+      } else {
+          Write-Host "Azure Data Lake source registration failed $retryCount time(s). Retrying in $secondsDelay seconds."
+          Write-Warning $Error[0]
+          Start-Sleep $secondsDelay
+          $retrycount++
       }
-  }
-}"
-
-$retrycount = 1
-$completed = $false
-
-while (-not $completed) {
-  try {
-    $result = Invoke-RestMethod -Method Put -ContentType "application/json" -Uri $uri -Headers $headers -Body $body -ErrorAction Stop
-    Write-Host "Azure Data Lake source registered successfully."
-    $completed = $true
-  }
-  catch {
-    if ($retrycount -ge $retries) {
-        Write-Host "Azure Data Lake source registration failed the maximum number of $retryCount times."
-        throw
-    } else {
-        Write-Host "Azure Data Lake source registration failed $retryCount time(s). Retrying in $secondsDelay seconds."
-        Write-Warning $Error[0]
-        Start-Sleep $secondsDelay
-        $retrycount++
     }
   }
 }
+
+
 #------------------------------------------------------------------------------------------------------------
 
 #Register Synapse Workspace Data Source
@@ -242,3 +297,14 @@ while (-not $completed) {
   }
 }
 #------------------------------------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------------------------------------
+# CONTROL PLANE OPERATOR: DISABLE PUBLIC NETWORK ACCESS
+# For vNet-integrated deployments, disable public network access. Access to Synapse only through private endpoints.
+#------------------------------------------------------------------------------------------------------------
+
+if ($NetworkIsolationMode -eq "vNet") {
+  $body = "{properties:{publicNetworkAccess:""Disabled""}}"
+  Set-PurviewControlPlaneOperation -PurviewAccountID $PurviewAccountID -HttpRequestBody $body
+}
+
