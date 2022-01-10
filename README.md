@@ -33,9 +33,29 @@ You can have more control over the deployment by providing values to optional te
 az deployment group create --resource-group resource-group-name --template-file ./AzureAnalyticsE2E.bicep --parameters synapseSqlAdminPassword=use-complex-password-here param1=value1 param2=value2...
 ```
 
+### Required Resource Providers
+
+The target subscription for the deployment accelerator needs to have the following resource providers enabled before the deployment execution:
+
+* Microsoft.Synapse
+* Microsoft.Purview
+* Microsoft.MachineLearningServices
+* Microsoft.ContainerRegistry
+* Microsoft.Network
+* Microsoft.DataShare
+* Microsoft.Authorization
+* Microsoft.CognitiveServices
+* Microsoft.ManagedIdentity
+* Microsoft.KeyVault
+* Microsoft.Storage
+* Microsoft.StreamAnalytics
+* Microsoft.Devices
+* Microsoft.Insights
+* Microsoft.EventHub
+
 ### Deployment Details
 
-The solution accelerator can be deployed in two network isolation modes: **default** or **vNet**.
+The deployment accelerator can be deployed in two network isolation modes: **default** or **vNet**.
 
 Network Isolation Mode | Description
 -----------------------|-------------
