@@ -264,7 +264,7 @@ module m_PlatformServicesDeploy 'modules/PlatformServicesDeploy.bicep' = {
   }
 }
 
-//Deploy Core Services: Data Lake Account, Synapse Workspace and Key Vault.
+//Deploy Core Services: Data Lake Account and Synapse Workspace.
 module m_SynapseDeploy 'modules/SynapseDeploy.bicep' = {
   name: 'SynapseDeploy'
   dependsOn:[
