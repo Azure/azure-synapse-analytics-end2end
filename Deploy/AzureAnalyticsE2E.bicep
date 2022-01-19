@@ -97,7 +97,7 @@ param synapseWorkspaceName string = 'azsynapsewks${uniqueSuffix}'
 @description('SQL Admin User Name')
 param synapseSqlAdminUserName string = 'azsynapseadmin'
 
-@description('SQL Admin User Name')
+@description('SQL Admin User Password')
 param synapseSqlAdminPassword string
 
 @description('Synapse Managed Resource Group Name')
