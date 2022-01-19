@@ -273,8 +273,8 @@ Streaming        |azstreamjob*suffix*            |Stream Analytics job       |  
 
 ## Contributing
 
-If you would like to contribute to the solution (log bugs, issues, or add code) we have details on how to do that in our [CONTRIBUTING.md](https://github.com/fabragaMS/AzureAnalyticsE2E/blob/master/README.md) file.
+If you would like to contribute to the solution (log bugs, issues, or add code) we have details on how to do that in our [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 ## License
 
-Details on licensing for the project can be found in the [LICENSE](https://github.com/fabragaMS/AzureAnalyticsE2E/blob/master/LICENSE) file.
+Details on licensing for the project can be found in the [LICENSE](./LICENSE) file.
