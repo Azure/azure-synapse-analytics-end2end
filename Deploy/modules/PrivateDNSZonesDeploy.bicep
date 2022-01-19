@@ -43,7 +43,7 @@ module m_privateDNSZoneStorageQueue 'PrivateDNSZone.bicep' = if (ctrlDeployPurvi
   }
 }
 
-//Private DNS Zones required for Storage File Private Link: privatelink.queue.core.windows.net
+//Private DNS Zones required for Storage File Private Link: privatelink.file.core.windows.net
 //Required for Azure ML Storage Account
 module m_privateDNSZoneStorageFile 'PrivateDNSZone.bicep' = if (ctrlDeployAI == true) {
   name: 'PrivateDNSZoneStorageFile'
@@ -140,7 +140,7 @@ module m_privateDNSZoneACR 'PrivateDNSZone.bicep' = if(ctrlDeployAI == true) {
   }
 }
 
-//Azure Machine Learning Workspace DNS Zone: privatelink.azurecr.io
+//Azure Machine Learning Workspace DNS Zone: privatelink.api.azureml.ms
 //Required by Azure ML
 module m_privateDNSZoneAzureMLAPI 'PrivateDNSZone.bicep' = if(ctrlDeployAI == true) {
   name: 'PrivateDNSZoneAzureMLAPI'
@@ -173,8 +173,8 @@ module m_privateDNSZoneIoTHub 'PrivateDNSZone.bicep' = if(ctrlDeployStreaming ==
   }
 }
 
-//Cognitive Services DNS Zone: privatelink.azure-devices.net
-//Required by IoTHub
+//Cognitive Services DNS Zone: privatelink.cognitiveservices.azure.com
+//Required by Cognitive Services
 module m_privateDNSZoneCognitiveService 'PrivateDNSZone.bicep' = if(ctrlDeployAI == true) {
   name: 'PrivateDNSZoneCognitiveService'
   params: {
