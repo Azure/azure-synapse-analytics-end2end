@@ -261,7 +261,7 @@
                                         "text": "Please configure your Purview account.",
                                         "link": {
                                             "label": "Learn more",
-                                            "uri": "https://www.microsoft.com"
+                                            "uri": "https://github.com/Azure/azure-synapse-analytics-end2end"
                                         }
                                     }
                                 },
@@ -301,7 +301,7 @@
                                         "text": "Please configure your AI workload.",
                                         "link": {
                                             "label": "Learn more",
-                                            "uri": "https://www.microsoft.com"
+                                            "uri": "https://github.com/Azure/azure-synapse-analytics-end2end"
                                         }
                                     }
                                 },
@@ -312,7 +312,7 @@
 									"options": {
 										"icon": "Info",
 										"text": "AI services include Azure Machine Learning, Anomaly Detector and Cognitive Services.",
-										"uri": "https://www.microsoft.com"
+										"uri": "https://github.com/Azure/azure-synapse-analytics-end2end"
 									}
 								},
 								{
@@ -350,7 +350,7 @@
 									"options": {
 										"icon": "Info",
 										"text": "Data streaming services include Azure EventHubs, Azure IoT Hub and Stream Analytics.",
-										"uri": "https://www.microsoft.com"
+										"uri": "https://github.com/Azure/azure-synapse-analytics-end2end"
 									}
 								},
 								{
@@ -439,8 +439,8 @@
 							"visible": "[equals(steps('basics').networkIsolationModeSection.networkIsolationMode, 'default')]",
 							"options": {
 								"icon": "Warning",
-								"text": "Your Deployment Mode is set to 'Default (Public Endpoints)' and all services will be deployed with public endpoints. Please review the firewall configuration for the deployed services to allow connectivity from approved networks.",
-								"uri": "https://www.microsoft.com"
+								"text": "Your Deployment Mode is set to 'Public Endpoints (default)' and all services will be deployed with public endpoints. Please review the firewall configuration for the deployed services to allow connectivity from approved networks.",
+								"uri": "https://github.com/Azure/azure-synapse-analytics-end2end"
 							}
 						},
 						{
@@ -471,7 +471,7 @@
 									},
 									"subnets": {
 										"default": {
-											"label": "default",
+											"label": "Subnet",
 											"defaultValue": {
 												"name": "default",
 												"addressPrefixSize": "/24"
