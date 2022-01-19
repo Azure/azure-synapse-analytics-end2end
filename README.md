@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a deployment accelerator based on the reference architecture described in the Azure Architecture Centre article [Analytics end-to-end with Azure Synapse](https://docs.microsoft.com/azure/architecture/example-scenario/dataplate2e/data-platform-end-to-end). This deployment accelerator aims to automate not only the deployment of the services covered by the reference architecture, but also to fully automate the configuration and permissions required for the services to work together. The deployed architecture enables the end-to-end analytics platform capable of handling the most common uses cases for most organizations.
+This is a deployment accelerator based on the reference architecture described in the Azure Architecture Center article [Analytics end-to-end with Azure Synapse](https://docs.microsoft.com/azure/architecture/example-scenario/dataplate2e/data-platform-end-to-end). This deployment accelerator aims to automate not only the deployment of the services covered by the reference architecture, but also to fully automate the configuration and permissions required for the services to work together. The deployed architecture enables the end-to-end analytics platform capable of handling the most common uses cases for most organizations.
 
 The implementation of this deployment accelerator is done through the use of [Azure Bicep](https://github.com/Azure/bicep), a domain-specific language (DSL) that uses declarative syntax to deploy Azure resources.
 
