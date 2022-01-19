@@ -21,4 +21,4 @@ We track bugs as [GitHub issues](https://guides.github.com/features/issues/). Cr
     - (Optional but preferred) Deployment details: Specify the version of the Azure PowerShell/Azure CLI/Bicep CLI you're using.
 
 ### Contributing to code, Branching, and Pull Requests
-We follow the [GitHub Flow approach](https://guides.github.com/introduction/flow/) as part of our development with this solution. Please do not work directly on the "main" or "master" branch at this stage.
+We follow the [GitHub Flow approach](https://guides.github.com/introduction/flow/) as part of our development with this solution. Please do not work directly on the "main" branch at this stage.
