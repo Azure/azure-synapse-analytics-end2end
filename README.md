@@ -32,6 +32,8 @@ You can have more control over the deployment by providing values to optional te
 ```azurecli
 az deployment group create --resource-group resource-group-name --template-file ./AzureAnalyticsE2E.bicep --parameters synapseSqlAdminPassword=use-complex-password-here param1=value1 param2=value2...
 ```
+> **Important:** This deployment accelerator is meant to be executed under no interference from Azure Policies that deny certain configurations as they might prevent the its successful completion. Please use a sandbox environment if you need to validate the deployment resulting configuration before you run it against other environments under Azure Policies.
+
 
 ### Required Resource Providers
 
