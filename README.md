@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a deployment accelerator based on the reference architecture described in the Azure Architecture Centre article [Analytics end-to-end with Azure Synapse](https://docs.microsoft.com/azure/architecture/example-scenario/dataplate2e/data-platform-end-to-end). This deployment accelerator aims to automate not only the deployment of the services covered by the reference architecture, but also to fully automate the configuration and permissions required for the services to work together. The deployed architecture enables the end-to-end analytics platform capable of handling the most common uses cases for most organizations.
+This is a deployment accelerator based on the reference architecture described in the Azure Architecture Center article [Analytics end-to-end with Azure Synapse](https://docs.microsoft.com/azure/architecture/example-scenario/dataplate2e/data-platform-end-to-end). This deployment accelerator aims to automate not only the deployment of the services covered by the reference architecture, but also to fully automate the configuration and permissions required for the services to work together. The deployed architecture enables the end-to-end analytics platform capable of handling the most common uses cases for most organizations.
 
 The implementation of this deployment accelerator is done through the use of [Azure Bicep](https://github.com/Azure/bicep), a domain-specific language (DSL) that uses declarative syntax to deploy Azure resources.
 
@@ -32,6 +32,9 @@ You can have more control over the deployment by providing values to optional te
 ```azurecli
 az deployment group create --resource-group resource-group-name --template-file ./AzureAnalyticsE2E.bicep --parameters synapseSqlAdminPassword=use-complex-password-here param1=value1 param2=value2...
 ```
+> **Important:** This deployment accelerator is meant to be executed under no interference from Azure Policies that deny certain configurations as they might prevent the its successful completion. Please use a sandbox environment if you need to validate the deployment resulting configuration before you run it against other environments under Azure Policies.
+
+> **Important:** This deployment accelerator implements some service features that are still in Public Preview. Please consider those before you plan for a production deployment.
 
 ### Required Resource Providers
 
@@ -65,46 +68,72 @@ Network Isolation Mode | Description
 ### Azure Services Provisioned
 
 The scope of this deployment accelerator is illustrated in the diagram below.
-> **Important:** All services are deployed in a single resource group and in the same region as the resource group. Before creating the resource group that will host the workloads, check the [Azure Products by Region](https://azure.microsoft.com/en-us/global-infrastructure/services/?products=purview,key-vault,virtual-network,data-share,event-hubs,cognitive-services,storage,iot-hub,container-registry,synapse-analytics,stream-analytics,machine-learning-service&regions=all) and select a region that has all selected services available. The deployment will fail if any of the services is not available in the chosen region.
-
-The Azure services used in the architecture above have been divided into workloads that can be conditionally deployed based on input parameters to better suit the needs of the workload.
-
-> **Note:** The only mandatory workload is Synapse Analytics represented in the grey box in the diagram.
 
 ![Achitecture Components](./Diagrams/ArchitectureWorkloads.png)
 
-The following services are part of the deployment accelerator and they will all be deployed in a single resource group and in the region where the resource group was defined.
+> **Important:** All services are deployed in a single resource group and in the same region as the resource group. Before creating the resource group that will host the workloads, check the [Azure Products by Region](https://azure.microsoft.com/global-infrastructure/services/?products=purview,key-vault,virtual-network,data-share,event-hubs,cognitive-services,storage,iot-hub,container-registry,synapse-analytics,stream-analytics,machine-learning-service&regions=all) and select a region that has all selected services available. The deployment will fail if any of the services is not available in the chosen region.
 
-The default pricing tier for all services are provisioned are their lowest possible to meet the initial deployment requirements. If you choose to provide different different values to the input parameters, please observe the pricing information for each service in the table below.
+> **Note:** The only mandatory workload is Synapse Analytics represented in the grey box in the diagram.
 
 > **Important:** For a fully automated deployment and configuration of Synapse Analytics and Purview the deployment accelerator makes use of post-deployment PowerShell scripts to perform data plane operations. For more details about the scripts see the deployment accelerator documentation.
 
+The default pricing tier for all services are provisioned are their lowest possible to meet the initial deployment requirements. If you choose to provide different different values to the input parameters, please observe the pricing information for each service in the table below.
+
 If explicit names are not provided, all services names will be appended with a unique 5-letter *suffix* to ensure name uniqueness in Azure.
 
-Workload         |Name                           | Type                      | Default Pricing Tier             |Pricing Info                                                                                                             | Conditional  |Notes
------------------|-------------------------------|---------------------------|----------------------------------|-------------------------------------------------------------------------------------------------------------------------|--------------|------------
-Platform Services|az-*resource group name*-uami  |Managed Identity           | N/A                              |                                                                                                                         | No           | Required to run post-deployment scripts. Should be deleted once deployment is complete.
-Synapse Analytics|azsynapsewks*suffix*           |Synapse workspace          | N/A                              |[Azure Synapse Analytics pricing](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing)                | No           | Default workspace deployment doesn't incur costs.
-Synapse Analytics|SparkCluster                   |Apache Spark pool          | Small (3 nodes)                  |[Azure Synapse Analytics pricing](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing)                | Yes          |
-Synapse Analytics|EnterpriseDW                   |Synapse SQL pool           | DW100                            |[Azure Synapse Analytics pricing](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing)                | Yes          |
-Synapse Analytics|adxpool*suffix*                |Data Explorer pool         | Extra Small (2 nodes)            |[Azure Synapse Analytics pricing](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing)                | Yes          |
-Synapse Analytics|azwksdatalake*suffix*          |Storage account            | Standard LRS                     |[Azure Blob Storage pricing](https://azure.microsoft.com/pricing/details/storage/blobs/)                                 | No           |
-Synapse Analytics|azrawdatalake*suffix*          |Storage account            | Standard GRS                     |[Azure Blob Storage pricing](https://azure.microsoft.com/pricing/details/storage/blobs/)                                 | No           |
-Synapse Analytics|azcurateddatalake*suffix*      |Storage account            | Standard GRS                     |[Azure Blob Storage pricing](https://azure.microsoft.com/pricing/details/storage/blobs/)                                 | No           |
-Platform Services|azkeyvault*suffix*             |Key vault                  | Standard A                       |[Azure Key Vault pricing](https://azure.microsoft.com/pricing/details/key-vault/#pricing)                                | No           |
-Synapse Analytics|SynapsePostDeploymentScript    |Deployment Script          | N/A                              |                                                                                                                         | No           | Deployment script resources will be automatically deleted after 24hs.
-Data Governance  |azpurview*suffix*              |Purview account            | 1 Capacity Unit                  |[Azure Purview pricing](https://azure.microsoft.com/pricing/details/azure-purview/#pricing)                              | Yes          |
-Data Governance  |PurviewPostDeploymentScript    |Deployment Script          | N/A                              |                                                                                                                         | Yes          | Deployment script resources will be automatically deleted after 24hs.
-AI               |azanomalydetector*suffix*      |Anomaly detector           | Standard                         |[Anomaly Detector pricing](https://azure.microsoft.com/pricing/details/cognitive-services/anomaly-detector/#pricing)     | Yes          |
-AI               |aztextanalytics*suffix         |Language                   | Standard                         |[Language Service pricing](https://azure.microsoft.com/pricing/details/cognitive-services/language-service/#pricing)     | Yes          |
-AI               |azmlwks*suffix*                |Machine learning workspace | N/A                              |[Azure Machine Learning pricing](https://azure.microsoft.com/pricing/details/machine-learning/#pricing)                  | Yes          | Default workspace deployment doesn't incur costs.
-AI               |azmlstorage*suffix*            |Storage account            | Standard LRS                     |[Azure Blob Storage pricing](https://azure.microsoft.com/pricing/details/storage/blobs/)                                 | Yes          |
-AI               |azmlcontainerreg*suffix*       |Container registry         | Basic or Premium (see notes)     |[Azure Container Registry pricing](https://azure.microsoft.com/pricing/details/container-registry/#pricing)              | Yes          | [Premium service tier required for private link support](https://docs.microsoft.com/azure/container-registry/container-registry-private-link#prerequisites)
-AI               |azmlappinsights*suffix*        |Application Insights       | On-demand data ingestion charges |[Azure Container Registry pricing](https://azure.microsoft.com/pricing/details/monitor/#pricing)                         | Yes          |
-Data Share       |azdatashare*suffix*            |Data Share                 | On-demand data processing charges|[Azure Data Share pricing](https://azure.microsoft.com//pricing/details/data-share/)                                     | Yes          |
-Streaming        |azeventhubns*suffix*           |Event Hub namespace        | Basic                            |[Azure Event Hubs pricing](https://azure.microsoft.com/pricing/details/event-hubs/)                                      | Yes          |
-Streaming        |aziothub*suffix*               |IoT Hub                    | Free                             |[Azure IoT Hub pricing](https://azure.microsoft.com/pricing/details/iot-hub/)                                            | Yes          |
-Streaming        |azstreamjob*suffix*            |Stream Analytics job       | Standard                         |[Azure Stream Analytics pricing](https://azure.microsoft.com/pricing/details/stream-analytics/)                          | Yes          |
+The Azure services used in the architecture above have been divided into **workloads** that can be conditionally deployed based on input parameters:
+
+#### Platform Services
+
+Name                           | Type                      | Default Pricing Tier                                                                |Conditional  |Notes
+-------------------------------|---------------------------|-------------------------------------------------------------------------------------|-------------|------------
+az-*resource group name*-uami  |Managed Identity           | N/A                                                                                 | No          | Required to run post-deployment scripts. It is deleted by clean-up post deployment script.
+azkeyvault*suffix*             |Key vault                  | [Standard A](https://azure.microsoft.com/pricing/details/key-vault/#pricing)        | No          |
+
+#### Synapse Analytics
+
+Name                           | Type                      | Default Pricing Tier                                                                            | Conditional  |Notes
+-------------------------------|---------------------------|-------------------------------------------------------------------------------------------------|--------------|------------
+azsynapsewks*suffix*           |Synapse workspace          | [N/A](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing)                   | No           | Default workspace deployment doesn't incur costs.
+SparkCluster                   |Apache Spark pool          | [Small (3 nodes)](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing)       | Yes          |
+EnterpriseDW                   |Synapse SQL pool           | [DW100](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing)                 | Yes          |
+adxpool*suffix*                |Data Explorer pool         | [Extra Small (2 nodes)](https://azure.microsoft.com/pricing/details/synapse-analytics/#pricing) | Yes          |
+azwksdatalake*suffix*          |Storage account            | [Standard LRS](https://azure.microsoft.com/pricing/details/storage/blobs/)                      | No           |
+azrawdatalake*suffix*          |Storage account            | [Standard GRS](https://azure.microsoft.com/pricing/details/storage/blobs/)                      | No           |
+azcurateddatalake*suffix*      |Storage account            | [Standard GRS](https://azure.microsoft.com/pricing/details/storage/blobs/)                      | No           |
+SynapsePostDeploymentScript    |Deployment Script          | N/A                                                                                             | No           | Deployment script resources will be automatically deleted after 24hs.
+
+#### Data Governance
+
+Name                           | Type                      | Default Pricing Tier                                                                   | Conditional  |Notes
+-------------------------------|---------------------------|----------------------------------------------------------------------------------------|--------------|------------
+azpurview*suffix*              |Purview account            | [1 Capacity Unit](https://azure.microsoft.com/pricing/details/azure-purview/#pricing)  | Yes          |
+PurviewPostDeploymentScript    |Deployment Script          | N/A                                                                                    | Yes          | Deployment script resources will be automatically deleted after 24hs.
+
+#### Artificial Intelligence (AI)
+
+Name                           | Type                      | Default Pricing Tier                                                                                     | Conditional  |Notes
+-------------------------------|---------------------------|----------------------------------------------------------------------------------------------------------|--------------|------------
+azanomalydetector*suffix*      |Anomaly detector           | [Standard](https://azure.microsoft.com/pricing/details/cognitive-services/anomaly-detector/#pricing)     | Yes          |
+aztextanalytics*suffix*        |Language                   | [Standard](https://azure.microsoft.com/pricing/details/cognitive-services/language-service/#pricing)     | Yes          |
+azmlwks*suffix*                |Machine learning workspace | [N/A](https://azure.microsoft.com/pricing/details/machine-learning/#pricing)                             | Yes          | Default workspace deployment doesn't incur costs.
+azmlstorage*suffix*            |Storage account            | [Standard LRS](https://azure.microsoft.com/pricing/details/storage/blobs/)                               | Yes          |
+azmlcontainerreg*suffix*       |Container registry         | [Basic or Premium (see notes)](https://azure.microsoft.com/pricing/details/container-registry/#pricing)  | Yes          | [Premium service tier required for private link support](https://docs.microsoft.com/azure/container-registry/container-registry-private-link#prerequisites)
+azmlappinsights*suffix*        |Application Insights       | [On-demand data ingestion charges](https://azure.microsoft.com/pricing/details/monitor/#pricing)         | Yes          |
+
+#### Data Sharing
+
+Name                           | Type                      | Default Pricing Tier                                                                              | Conditional  |Notes
+-------------------------------|---------------------------|---------------------------------------------------------------------------------------------------|--------------|------------
+azdatashare*suffix*            |Data Share                 | [On-demand data processing charges](https://azure.microsoft.com//pricing/details/data-share/)     | Yes          |
+
+#### Streaming
+
+Name                           | Type                      | Default Pricing Tier                                                       | Conditional  |Notes
+-------------------------------|---------------------------|----------------------------------------------------------------------------|--------------|------------
+azeventhubns*suffix*           |Event Hub namespace        | [Basic](https://azure.microsoft.com/pricing/details/event-hubs/)           | Yes          |
+aziothub*suffix*               |IoT Hub                    | [Free](https://azure.microsoft.com/pricing/details/iot-hub/)               | Yes          |
+azstreamjob*suffix*            |Stream Analytics job       | [Standard](https://azure.microsoft.com/pricing/details/stream-analytics/)  | Yes          |
 
 ## Integration and Permissions
 
@@ -247,8 +276,8 @@ Streaming        |azstreamjob*suffix*            |Stream Analytics job       |  
 
 ## Contributing
 
-If you would like to contribute to the solution (log bugs, issues, or add code) we have details on how to do that in our [CONTRIBUTING.md](https://github.com/fabragaMS/AzureAnalyticsE2E/blob/master/README.md) file.
+If you would like to contribute to the solution (log bugs, issues, or add code) we have details on how to do that in our [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 ## License
 
-Details on licensing for the project can be found in the [LICENSE](https://github.com/fabragaMS/AzureAnalyticsE2E/blob/master/LICENSE) file.
+Details on licensing for the project can be found in the [LICENSE](./LICENSE) file.

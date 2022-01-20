@@ -97,7 +97,7 @@ param synapseWorkspaceName string = 'azsynapsewks${uniqueSuffix}'
 @description('SQL Admin User Name')
 param synapseSqlAdminUserName string = 'azsynapseadmin'
 
-@description('SQL Admin User Name')
+@description('SQL Admin User Password')
 param synapseSqlAdminPassword string
 
 @description('Synapse Managed Resource Group Name')
@@ -264,7 +264,7 @@ module m_PlatformServicesDeploy 'modules/PlatformServicesDeploy.bicep' = {
   }
 }
 
-//Deploy Core Services: Data Lake Account, Synapse Workspace and Key Vault.
+//Deploy Core Services: Data Lake Account and Synapse Workspace.
 module m_SynapseDeploy 'modules/SynapseDeploy.bicep' = {
   name: 'SynapseDeploy'
   dependsOn:[
@@ -541,7 +541,7 @@ resource r_deploymentScriptUAMI 'Microsoft.ManagedIdentity/userAssignedIdentitie
   name: deploymentScriptUAMIName
 }
 
-//Synapse Deployment Script
+//Synapse Deployment Script: script location encoded in Base64
 var synapsePSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9TeW5hcHNlUG9zdERlcGxveS5wczE='
 
 var azMLSynapseLinkedServiceIdentityID = ctrlDeployAI ? '-AzMLSynapseLinkedServiceIdentityID ${m_ServiceConnectionsDeploy.outputs.azureMLSynapseLinkedServicePrincipalID}' : ''
@@ -552,13 +552,13 @@ var datalakeAccountSynapseParams = '-WorkspaceDataLakeAccountName ${workspaceDat
 var synapseWorkspaceParams = '-SynapseWorkspaceName ${synapseWorkspaceName} -SynapseWorkspaceID ${m_SynapseDeploy.outputs.synapseWorkspaceID}'
 var synapseScriptArguments = '-NetworkIsolationMode ${networkIsolationMode} -ctrlDeployAI $${ctrlDeployAI} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceGroup().location} -UAMIIdentityID ${m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID} -KeyVaultName ${keyVaultName} -KeyVaultID ${m_PlatformServicesDeploy.outputs.keyVaultID} ${synapseWorkspaceParams} ${azMLSynapseLinkedServiceIdentityID} ${datalakeAccountSynapseParams} ${azMLWorkspaceName} ${azTextAnalyticsParams} ${azAnomalyDetectorParams}'
 
-//Purview Deployment Script
+//Purview Deployment Script: script location encoded in Base64
 var purviewPSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9QdXJ2aWV3UG9zdERlcGxveS5wczE='
 var dataShareIdentityID = ctrlDeployDataShare ? '-DataShareIdentityID ${m_DataShareDeploy.outputs.dataShareAccountPrincipalID}' : ''
 var datalakeAccountPurviewParams = '-WorkspaceDataLakeAccountName ${workspaceDataLakeAccountName} -RawDataLakeAccountName ${rawDataLakeAccountName} -CuratedDataLakeAccountName ${curatedDataLakeAccountName}'
 var purviewScriptArguments = '-PurviewAccountID ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAccountID : ''} -PurviewAccountName ${purviewAccountName} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -UAMIIdentityID ${m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID} -ScanEndpoint ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewScanEndpoint : ''} -APIVersion ${ctrlDeployPurview ? m_PurviewDeploy.outputs.purviewAPIVersion : ''} -SynapseWorkspaceName ${m_SynapseDeploy.outputs.synapseWorkspaceName} -SynapseWorkspaceIdentityID ${m_SynapseDeploy.outputs.synapseWorkspaceIdentityPrincipalID} -KeyVaultName ${keyVaultName} -KeyVaultID ${m_PlatformServicesDeploy.outputs.keyVaultID} ${datalakeAccountPurviewParams} ${dataShareIdentityID} -NetworkIsolationMode ${networkIsolationMode}'
 
-//CleanUp Deployment Script
+//CleanUp Deployment Script: script location encoded in Base64
 var cleanUpPSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9DbGVhblVwUG9zdERlcGxveS5wczE='
 var cleanUpScriptArguments = '-UAMIResourceID ${r_deploymentScriptUAMI.id}'
 

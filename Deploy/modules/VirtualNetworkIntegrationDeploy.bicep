@@ -613,7 +613,7 @@ module m_dataLakeStorageAccountFilePrivateLink './PrivateEndpoint.bicep' = if(ct
 }
 
 //Private Link for Azure Container Registry
-module m_azureMLContainerRegistryPrivateLInk './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
+module m_azureMLContainerRegistryPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
   name: '${azureMLContainerRegistryName}-registry'
   dependsOn:[
     m_DeployPrivateDNSZones
