@@ -34,6 +34,7 @@ az deployment group create --resource-group resource-group-name --template-file 
 ```
 > **Important:** This deployment accelerator is meant to be executed under no interference from Azure Policies that deny certain configurations as they might prevent the its successful completion. Please use a sandbox environment if you need to validate the deployment resulting configuration before you run it against other environments under Azure Policies.
 
+> **Important:** This deployment accelerator implements some service features that are still in Public Preview. Please consider those before you plan for a production deployment.
 
 ### Required Resource Providers
 
