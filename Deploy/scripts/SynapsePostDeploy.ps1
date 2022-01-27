@@ -284,9 +284,21 @@ if ($CtrlDeployAI) {
 # For vNet-integrated deployments, create the private endpoints to the resources required by Synapse managed vNet
 #------------------------------------------------------------------------------------------------------------
 
-[string[]] $managedPrivateEndpointNames = $KeyVaultName, $WorkspaceDataLakeAccountName, $RawDataLakeAccountName, $CuratedDataLakeAccountName, $TextAnalyticsAccountName, $AnomalyDetectorAccountName
-[string[]] $managedPrivateEndpointIDs = $KeyVaultID, $WorkspaceDataLakeAccountID, $RawDataLakeAccountID, $CuratedDataLakeAccountID, $TextAnalyticsAccountID, $AnomalyDetectorAccountID
-[string[]] $managedPrivateEndpointGroups = 'vault', 'dfs', 'dfs', 'dfs', 'account', 'account'
+[string[]] $managedPrivateEndpointNames = $KeyVaultName, $WorkspaceDataLakeAccountName, $RawDataLakeAccountName, $CuratedDataLakeAccountName
+[string[]] $managedPrivateEndpointIDs = $KeyVaultID, $WorkspaceDataLakeAccountID, $RawDataLakeAccountID, $CuratedDataLakeAccountID
+[string[]] $managedPrivateEndpointGroups = 'vault', 'dfs', 'dfs', 'dfs'
+
+if($CtrlDeployAI) {
+  #If AI workload is deployed then add cognitive services to the list of managed endpoints.
+  [string[]] $cognitiveServicePrivateEndpointNames = $TextAnalyticsAccountName, $AnomalyDetectorAccountName
+  [string[]] $cognitiveServicePrivateEndpointIDs = $TextAnalyticsAccountID, $AnomalyDetectorAccountID
+  [string[]] $cognitiveServicePrivateEndpointGroups =  'account', 'account'
+
+  $managedPrivateEndpointNames += $cognitiveServicePrivateEndpointNames
+  $managedPrivateEndpointIDs += $cognitiveServicePrivateEndpointIDs
+  $managedPrivateEndpointGroups += $cognitiveServicePrivateEndpointGroups
+}
+
 
 if ($NetworkIsolationMode -eq "vNet") {
   for($i = 0; $i -le ($managedPrivateEndpointNames.Length - 1); $i += 1)
