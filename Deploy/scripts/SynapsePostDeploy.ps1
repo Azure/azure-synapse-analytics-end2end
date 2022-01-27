@@ -57,7 +57,7 @@ function Set-SynapseControlPlaneOperation{
 
   $retrycount = 1
   $completed = $false
-  $secondsDelay = 30
+  $secondsDelay = 60
 
   while (-not $completed) {
     try {
@@ -93,7 +93,7 @@ function Save-SynapseLinkedService{
   Write-Host "Creating Linked Service [$LinkedServiceName]..."
   $retrycount = 1
   $completed = $false
-  $secondsDelay = 30
+  $secondsDelay = 60
 
   while (-not $completed) {
     try {
@@ -121,7 +121,7 @@ function Save-SynapseLinkedService{
 #------------------------------------------------------------------------------------------------------------
 
 $retries = 10
-$secondsDelay = 30
+$secondsDelay = 60
 
 #------------------------------------------------------------------------------------------------------------
 # CONTROL PLANE OPERATION: ASSIGN SYNAPSE WORKSPACE ADMINISTRATOR TO USER-ASSIGNED MANAGED IDENTITY
