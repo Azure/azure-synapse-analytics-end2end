@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1124.51302",
-      "templateHash": "13560196500869798874"
+      "templateHash": "16254906332613489979"
     }
   },
   "parameters": {
@@ -188,7 +188,7 @@
     "synapseSqlAdminPassword": {
       "type": "string",
       "metadata": {
-        "description": "SQL Admin User Name"
+        "description": "SQL Admin User Password"
       }
     },
     "synapseManagedRGName": {
@@ -2843,7 +2843,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1124.51302",
-              "templateHash": "15310623857670683221"
+              "templateHash": "6917157471274213045"
             }
           },
           "parameters": {
@@ -4854,7 +4854,7 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-dfs', parameters('workspaceDataLakeAccountName'))]",
+              "name": "WorkspaceDataLakeDFSPrivateLink",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -4969,7 +4969,7 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-dfs', parameters('rawDataLakeAccountName'))]",
+              "name": "RawDataLakePrivateLinkDFS",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -5084,7 +5084,7 @@
             {
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-dfs', parameters('curatedDataLakeAccountName'))]",
+              "name": "CuratedDataLakePrivateLinkDFS",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -5200,7 +5200,7 @@
               "condition": "[equals(parameters('ctrlDeployPurview'), true())]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "purviewBlobPrivateLink",
+              "name": "PurviewBlobPrivateLink",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -6012,7 +6012,7 @@
               "condition": "[equals(parameters('ctrlDeployAI'), true())]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-account', parameters('textAnalyticsAccountName'))]",
+              "name": "TextAnalyticsPrivateLink",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -6128,7 +6128,7 @@
               "condition": "[equals(parameters('ctrlDeployAI'), true())]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-account', parameters('anomalyDetectorAccountName'))]",
+              "name": "AnomalyDetectorPrivateLink",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -6244,7 +6244,7 @@
               "condition": "[equals(parameters('ctrlDeployAI'), true())]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-blob', parameters('azureMLStorageAccountName'))]",
+              "name": "AzMLStorageAccountBlobPrivateLink",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -6360,7 +6360,7 @@
               "condition": "[equals(parameters('ctrlDeployAI'), true())]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-file', parameters('azureMLStorageAccountName'))]",
+              "name": "AzMLStorageAccountFilePrivateLink",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"
@@ -6476,7 +6476,7 @@
               "condition": "[equals(parameters('ctrlDeployAI'), true())]",
               "type": "Microsoft.Resources/deployments",
               "apiVersion": "2020-10-01",
-              "name": "[format('{0}-registry', parameters('azureMLContainerRegistryName'))]",
+              "name": "AzureMLContainerRegistryPrivateLink",
               "properties": {
                 "expressionEvaluationOptions": {
                   "scope": "inner"

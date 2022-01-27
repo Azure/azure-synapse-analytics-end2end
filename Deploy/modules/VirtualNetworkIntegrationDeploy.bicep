@@ -281,7 +281,7 @@ module m_keyVaultPrivateLink './PrivateEndpoint.bicep' = {
 
 //Private Link for Workdpace Data Lake DFS
 module m_workspaceDataLakeDFSPrivateLink './PrivateEndpoint.bicep' = {
-  name: '${workspaceDataLakeAccountName}-dfs'
+  name: 'WorkspaceDataLakeDFSPrivateLink'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
@@ -305,7 +305,7 @@ module m_workspaceDataLakeDFSPrivateLink './PrivateEndpoint.bicep' = {
 
 //Private Link for Raw Data Lake DFS
 module m_rawDataLakePrivateLinkDFS './PrivateEndpoint.bicep' = {
-  name: '${rawDataLakeAccountName}-dfs'
+  name: 'RawDataLakePrivateLinkDFS'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
@@ -329,7 +329,7 @@ module m_rawDataLakePrivateLinkDFS './PrivateEndpoint.bicep' = {
 
 //Private Link for Curated Data Lake DFS
 module m_curatedDataLakePrivateLinkDFS './PrivateEndpoint.bicep' = {
-  name: '${curatedDataLakeAccountName}-dfs'
+  name: 'CuratedDataLakePrivateLinkDFS'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
@@ -352,7 +352,7 @@ module m_curatedDataLakePrivateLinkDFS './PrivateEndpoint.bicep' = {
 }
 
 module m_purviewBlobPrivateLink 'PrivateEndpoint.bicep' = if(ctrlDeployPurview == true) {
-  name: 'purviewBlobPrivateLink'
+  name: 'PurviewBlobPrivateLink'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
@@ -515,7 +515,6 @@ module m_iotHubPrivateLink 'PrivateEndpoint.bicep' = if(ctrlDeployStreaming == t
   }
 }
 
-
 //Private Link for Text Analytics
 module m_textAnalyticsPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
   name: 'TextAnalyticsPrivateLink'
@@ -566,7 +565,7 @@ module m_anomalyDetectorPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI 
 
 //Private Link for Storage Account Blob Service
 module m_dataLakeStorageAccountBlobPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
-  name: '${azureMLStorageAccountName}-blob'
+  name: 'AzMLStorageAccountBlobPrivateLink'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
@@ -590,7 +589,7 @@ module m_dataLakeStorageAccountBlobPrivateLink './PrivateEndpoint.bicep' = if(ct
 
 //Private Link for Storage Account File Service
 module m_dataLakeStorageAccountFilePrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
-  name: '${azureMLStorageAccountName}-file'
+  name: 'AzMLStorageAccountFilePrivateLink'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
@@ -614,7 +613,7 @@ module m_dataLakeStorageAccountFilePrivateLink './PrivateEndpoint.bicep' = if(ct
 
 //Private Link for Azure Container Registry
 module m_azureMLContainerRegistryPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
-  name: '${azureMLContainerRegistryName}-registry'
+  name: 'AzureMLContainerRegistryPrivateLink'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
