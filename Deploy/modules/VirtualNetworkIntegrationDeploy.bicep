@@ -518,7 +518,7 @@ module m_iotHubPrivateLink 'PrivateEndpoint.bicep' = if(ctrlDeployStreaming == t
 
 //Private Link for Text Analytics
 module m_textAnalyticsPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
-  name: '${textAnalyticsAccountName}-account'
+  name: 'TextAnalyticsPrivateLink'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
@@ -542,7 +542,7 @@ module m_textAnalyticsPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI ==
 
 //Private Link for Anomaly Detector
 module m_anomalyDetectorPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployAI == true){
-  name: '${anomalyDetectorAccountName}-account'
+  name: 'AnomalyDetectorPrivateLink'
   dependsOn:[
     m_DeployPrivateDNSZones
   ]
