@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1124.51302",
-      "templateHash": "16254906332613489979"
+      "templateHash": "9145485138008351084"
     }
   },
   "parameters": {
@@ -448,6 +448,28 @@
     "cleanUpScriptArguments": "[format('-UAMIResourceID {0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('deploymentScriptUAMIName')))]"
   },
   "resources": [
+    {
+      "type": "Microsoft.Resources/deploymentScripts",
+      "apiVersion": "2020-10-01",
+      "name": "WaitTime",
+      "kind": "AzurePowerShell",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "scriptContent": "Start-Sleep -Seconds 60",
+        "azPowerShellVersion": "6.2",
+        "cleanupPreference": "OnSuccess",
+        "retentionInterval": "P1D",
+        "timeout": "PT30M"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'PurviewDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')]"
+      ]
+    },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
@@ -2447,7 +2469,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.4.1124.51302",
-              "templateHash": "9802757666615903816"
+              "templateHash": "9552044434161772237"
             }
           },
           "parameters": {
@@ -2560,7 +2582,7 @@
               "type": "Microsoft.Authorization/roleAssignments",
               "apiVersion": "2020-08-01-preview",
               "scope": "[format('Microsoft.Storage/storageAccounts/{0}', parameters('rawDataLakeAccountName'))]",
-              "name": "[guid('be61ada6-1a00-47ff-8027-81b1b6c7b82a', subscription().subscriptionId, resourceGroup().id)]",
+              "name": "be61ada6-1a00-47ff-8027-81b1b6c7b82a",
               "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('azureRBACStorageBlobDataReaderRoleID'))]",
                 "principalId": "[if(parameters('ctrlDeployAI'), parameters('azureMLSynapseLinkedServicePrincipalID'), '')]",
@@ -2684,30 +2706,19 @@
                 "principalId": "[if(parameters('ctrlDeployPurview'), parameters('purviewIdentityPrincipalID'), '')]",
                 "principalType": "ServicePrincipal"
               }
-            },
-            {
-              "condition": "[equals(parameters('ctrlDeployPurview'), true())]",
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-04-01-preview",
-              "name": "[guid('95024c9a-7d24-44e8-a9d8-29e86adbbecf', subscription().subscriptionId, resourceGroup().id)]",
-              "properties": {
-                "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('azureRBACOwnerRoleID'))]",
-                "principalId": "[parameters('UAMIPrincipalID')]",
-                "principalType": "ServicePrincipal"
-              }
             }
           ]
         }
       },
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy')]",
-        "[resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'DataShareDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PurviewDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'ServiceConnectionsDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy')]",
-        "[resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')]"
+        "[resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')]",
+        "[resourceId('Microsoft.Resources/deploymentScripts', 'WaitTime')]"
       ]
     },
     {
@@ -6718,6 +6729,7 @@
         "[resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PurviewDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'RBACRoleAssignmentDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')]"
       ]

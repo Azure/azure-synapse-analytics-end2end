@@ -360,7 +360,6 @@ module m_purviewBlobPrivateLink 'PrivateEndpoint.bicep' = if(ctrlDeployPurview =
     groupID: 'blob'
     privateEndpoitName: '${purviewAccountName}-blob'
     privateLinkServiceId: purviewManagedStorageAccountID
-    //privateLinkServiceId: r_purviewAccount.properties.managedResources.storageAccount
     resourceLocation: resourceLocation
     subnetID: subnetID
     deployDNSZoneGroup: ctrlDeployPrivateDNSZones
@@ -384,7 +383,6 @@ module m_purviewQueuePrivateLink 'PrivateEndpoint.bicep' = if(ctrlDeployPurview 
     groupID: 'queue'
     privateEndpoitName: '${purviewAccountName}-queue'
     privateLinkServiceId: purviewManagedStorageAccountID
-    //privateLinkServiceId: r_purviewAccount.properties.managedResources.storageAccount
     resourceLocation: resourceLocation
     subnetID: subnetID
     deployDNSZoneGroup: ctrlDeployPrivateDNSZones
@@ -408,7 +406,6 @@ module m_purviewEventHubPrivateLink 'PrivateEndpoint.bicep' = if(ctrlDeployPurvi
     groupID: 'namespace'
     privateEndpoitName: '${purviewAccountName}-namespace'
     privateLinkServiceId: purviewManagedEventHubNamespaceID
-    //privateLinkServiceId: r_purviewAccount.properties.managedResources.eventHubNamespace
     resourceLocation: resourceLocation
     subnetID: subnetID
     deployDNSZoneGroup: ctrlDeployPrivateDNSZones

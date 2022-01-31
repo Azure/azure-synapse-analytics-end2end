@@ -59,6 +59,7 @@ resource r_synapseWorkspaceOwner 'Microsoft.Authorization/roleAssignments@2020-0
 //Assign Storage Blob Reader Role to Purview MSI in the Resource Group as per https://docs.microsoft.com/en-us/azure/purview/register-scan-synapse-workspace
 resource r_purviewRGStorageBlobDataReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployPurview == true) {
   name: guid('3f2019ca-ce91-4153-920a-19e6dae191a8', subscription().subscriptionId, resourceGroup().id)
+  scope: resourceGroup()
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
     principalId: ctrlDeployPurview ? purviewIdentityPrincipalID : ''
@@ -69,6 +70,7 @@ resource r_purviewRGStorageBlobDataReader 'Microsoft.Authorization/roleAssignmen
 //Deployment script UAMI is set as Resource Group owner so it can have authorisation to perform post deployment tasks
 resource r_deploymentScriptUAMIRGOwner 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
   name: guid('139d07dd-a26c-4b29-9619-8f70ea215795', subscription().subscriptionId, resourceGroup().id)
+  scope: resourceGroup()
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACOwnerRoleID)
     principalId: UAMIPrincipalID
@@ -90,7 +92,8 @@ resource r_synapseAzureMLContributor 'Microsoft.Authorization/roleAssignments@20
 
 //Assign Storage Blob Data Reader Role to Azure ML MSI in the Raw Data Lake Account as per https://docs.microsoft.com/en-us/azure/machine-learning/how-to-identity-based-data-access
 resource r_azureMLRawStorageBlobDataReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if(ctrlDeployAI == true) {
-  name: guid('be61ada6-1a00-47ff-8027-81b1b6c7b82a', subscription().subscriptionId, resourceGroup().id)
+  //name: guid('be61ada6-1a00-47ff-8027-81b1b6c7b82a', subscription().subscriptionId, resourceGroup().id)
+  name: 'be61ada6-1a00-47ff-8027-81b1b6c7b82a'
   scope:r_rawDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
@@ -211,13 +214,3 @@ resource r_purviewSynapseReader 'Microsoft.Authorization/roleAssignments@2020-08
   }
 }
 
-//Assign Owner Role to UAMI in the Purview Account. UAMI needs it so it can make calls to Purview APIs from post deployment script.
-resource r_uamiPurviewOwner 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = if(ctrlDeployPurview == true) {
-  name: guid('95024c9a-7d24-44e8-a9d8-29e86adbbecf', subscription().subscriptionId, resourceGroup().id)
-  scope: ctrlDeployPurview ? r_purviewAccount : resourceGroup()
-  properties:{
-    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACOwnerRoleID)
-    principalId: UAMIPrincipalID
-    principalType:'ServicePrincipal'
-  }
-}
