@@ -59,7 +59,6 @@ resource r_synapseWorkspaceOwner 'Microsoft.Authorization/roleAssignments@2020-0
 //Assign Storage Blob Reader Role to Purview MSI in the Resource Group as per https://docs.microsoft.com/en-us/azure/purview/register-scan-synapse-workspace
 resource r_purviewRGStorageBlobDataReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployPurview == true) {
   name: guid('3f2019ca-ce91-4153-920a-19e6dae191a8', subscription().subscriptionId, resourceGroup().id)
-  scope: resourceGroup()
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
     principalId: ctrlDeployPurview ? purviewIdentityPrincipalID : ''
@@ -70,7 +69,6 @@ resource r_purviewRGStorageBlobDataReader 'Microsoft.Authorization/roleAssignmen
 //Deployment script UAMI is set as Resource Group owner so it can have authorisation to perform post deployment tasks
 resource r_deploymentScriptUAMIRGOwner 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
   name: guid('139d07dd-a26c-4b29-9619-8f70ea215795', subscription().subscriptionId, resourceGroup().id)
-  scope: resourceGroup()
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACOwnerRoleID)
     principalId: UAMIPrincipalID
@@ -92,9 +90,8 @@ resource r_synapseAzureMLContributor 'Microsoft.Authorization/roleAssignments@20
 
 //Assign Storage Blob Data Reader Role to Azure ML MSI in the Raw Data Lake Account as per https://docs.microsoft.com/en-us/azure/machine-learning/how-to-identity-based-data-access
 resource r_azureMLRawStorageBlobDataReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if(ctrlDeployAI == true) {
-  //name: guid('be61ada6-1a00-47ff-8027-81b1b6c7b82a', subscription().subscriptionId, resourceGroup().id)
-  name: 'be61ada6-1a00-47ff-8027-81b1b6c7b82a'
-  scope:r_rawDataLakeStorageAccount
+  name: guid('be61ada6-1a00-47ff-8027-81b1b6c7b82a', subscription().subscriptionId, resourceGroup().id)
+  scope: r_rawDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
     principalId: ctrlDeployAI ? azureMLSynapseLinkedServicePrincipalID : ''
@@ -105,7 +102,7 @@ resource r_azureMLRawStorageBlobDataReader 'Microsoft.Authorization/roleAssignme
 //Assign Storage Blob Data Reader Role to Azure ML MSI in the Curated Data Lake Account as per https://docs.microsoft.com/en-us/azure/machine-learning/how-to-identity-based-data-access
 resource r_azureMLCuratedStorageBlobDataReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if(ctrlDeployAI == true) {
   name: guid('57116cd9-7bcb-402c-8739-97a8b4c6afad', subscription().subscriptionId, resourceGroup().id)
-  scope:r_curatedDataLakeStorageAccount
+  scope: r_curatedDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
     principalId: ctrlDeployAI ? azureMLSynapseLinkedServicePrincipalID : ''
@@ -116,7 +113,7 @@ resource r_azureMLCuratedStorageBlobDataReader 'Microsoft.Authorization/roleAssi
 //Assign Storage Blob Data Reader Role to Azure Data Share in the Raw Data Lake Account as per https://docs.microsoft.com/en-us/azure/data-share/concepts-roles-permissions
 resource r_azureDataShareRawStorageBlobDataReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployDataShare == true) {
   name: guid('bbcbc4e3-e2bb-4cde-97c8-02636e6f1632', subscription().subscriptionId, resourceGroup().id)
-  scope:r_rawDataLakeStorageAccount
+  scope: r_rawDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
     principalId: ctrlDeployDataShare ? dataShareAccountPrincipalID : ''
@@ -127,7 +124,7 @@ resource r_azureDataShareRawStorageBlobDataReader 'Microsoft.Authorization/roleA
 //Assign Storage Blob Data Reader Role to Azure Data Share in the Curated Data Lake Account as per https://docs.microsoft.com/en-us/azure/data-share/concepts-roles-permissions
 resource r_azureDataShareCuratedStorageBlobDataReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployDataShare == true) {
   name: guid('d0d58921-3185-483b-892f-bbae0210fee9', subscription().subscriptionId, resourceGroup().id)
-  scope:r_curatedDataLakeStorageAccount
+  scope: r_curatedDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataReaderRoleID)
     principalId: ctrlDeployDataShare ? dataShareAccountPrincipalID : ''
@@ -139,7 +136,7 @@ resource r_azureDataShareCuratedStorageBlobDataReader 'Microsoft.Authorization/r
 //https://docs.microsoft.com/en-us/azure/stream-analytics/blob-output-managed-identity#grant-access-via-the-azure-portal
 resource r_streamAnalyticsRawStorageBlobDataContributor 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployStreaming == true) {
   name: guid('5411c956-6918-4e05-b23b-a8260d63799c', subscription().subscriptionId, resourceGroup().id)
-  scope:r_rawDataLakeStorageAccount
+  scope: r_rawDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataContributorRoleID)
     principalId: ctrlDeployStreaming ? streamAnalyticsIdentityPrincipalID : ''
@@ -151,7 +148,7 @@ resource r_streamAnalyticsRawStorageBlobDataContributor 'Microsoft.Authorization
 //https://docs.microsoft.com/en-us/azure/stream-analytics/blob-output-managed-identity#grant-access-via-the-azure-portal
 resource r_streamAnalyticsCuratedStorageBlobDataContributor 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployStreaming == true) {
   name: guid('a4c67752-b33e-492c-a62f-1514dd1f8364', subscription().subscriptionId, resourceGroup().id)
-  scope:r_curatedDataLakeStorageAccount
+  scope: r_curatedDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataContributorRoleID)
     principalId: ctrlDeployStreaming ? streamAnalyticsIdentityPrincipalID : ''
@@ -162,7 +159,7 @@ resource r_streamAnalyticsCuratedStorageBlobDataContributor 'Microsoft.Authoriza
 //Assign Storage Blob Data Contributor Role to IoTHub in the Raw Data Lake Account 
 resource r_iotHubRawStorageBlobDataContributor 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployStreaming == true && ctrlStreamingIngestionService == 'iothub') {
   name: guid('67c87aaa-7c65-4ca0-96bd-cc5ae82bd2f4', subscription().subscriptionId, resourceGroup().id)
-  scope:r_rawDataLakeStorageAccount
+  scope: r_rawDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataContributorRoleID)
     principalId: (ctrlDeployStreaming == true && ctrlStreamingIngestionService == 'iothub') ? iotHubPrincipalID : ''
@@ -173,7 +170,7 @@ resource r_iotHubRawStorageBlobDataContributor 'Microsoft.Authorization/roleAssi
 //Assign Storage Blob Data Contributor Role to IoTHub in the Curated Data Lake Account 
 resource r_iotHubCuratedStorageBlobDataContributor 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if (ctrlDeployStreaming == true && ctrlStreamingIngestionService == 'iothub') {
   name: guid('f1f3d703-c621-448f-a658-ce53ddbd81b0', subscription().subscriptionId, resourceGroup().id)
-  scope:r_curatedDataLakeStorageAccount
+  scope: r_curatedDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataContributorRoleID)
     principalId: (ctrlDeployStreaming == true && ctrlStreamingIngestionService == 'iothub') ? iotHubPrincipalID : ''
@@ -184,7 +181,7 @@ resource r_iotHubCuratedStorageBlobDataContributor 'Microsoft.Authorization/role
 //Assign Storage Blob Data Contributor Role to Synapse Workspace in the Raw Data Lake Account as per https://docs.microsoft.com/en-us/azure/synapse-analytics/security/how-to-grant-workspace-managed-identity-permissions#grant-the-managed-identity-permissions-to-adls-gen2-storage-account
 resource r_synapseWorkspaceRawStorageBlobDataContributor 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
   name: guid('a1fb98aa-4c53-4a4d-951f-3ac730a27a5b', subscription().subscriptionId, resourceGroup().id)
-  scope:r_rawDataLakeStorageAccount
+  scope: r_rawDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataContributorRoleID)
     principalId: synapseWorkspaceIdentityPrincipalID
@@ -195,7 +192,7 @@ resource r_synapseWorkspaceRawStorageBlobDataContributor 'Microsoft.Authorizatio
 //Assign Storage Blob Data Contributor Role to Synapse Workspace in the Curated Data Lake Account as per https://docs.microsoft.com/en-us/azure/synapse-analytics/security/how-to-grant-workspace-managed-identity-permissions#grant-the-managed-identity-permissions-to-adls-gen2-storage-account
 resource r_synapseWorkspaceCuratedStorageBlobDataContributor 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = {
   name: guid('4354d861-488d-4395-b018-2cc2baa9e491', subscription().subscriptionId, resourceGroup().id)
-  scope:r_curatedDataLakeStorageAccount
+  scope: r_curatedDataLakeStorageAccount
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACStorageBlobDataContributorRoleID)
     principalId: synapseWorkspaceIdentityPrincipalID
@@ -206,7 +203,7 @@ resource r_synapseWorkspaceCuratedStorageBlobDataContributor 'Microsoft.Authoriz
 //Assign Purview the Reader role in the Synapse Workspace as per https://docs.microsoft.com/en-us/azure/purview/register-scan-synapse-workspace#authentication-for-enumerating-serverless-sql-database-resources
 resource r_purviewSynapseReader 'Microsoft.Authorization/roleAssignments@2020-08-01-preview' = if(ctrlDeployPurview == true) {
   name: guid('f4191dd4-2d87-47c0-9f38-d3d24cc13f5c', subscription().subscriptionId, resourceGroup().id)
-  scope:r_synapseWorkspace
+  scope: r_synapseWorkspace
   properties:{
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACReaderRoleID)
     principalId: ctrlDeployPurview ? purviewIdentityPrincipalID : ''

@@ -445,29 +445,6 @@ module m_ServiceConnectionsDeploy 'modules/ServiceConnectionsDeploy.bicep' = {
   }
 }
 
-
-//Introduce a 60 second wait time to ensure all services have provisioning state = Created before being writeable (vNetIntegration and PostDeployment Scripts)
-resource r_WaitTime 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: 'WaitTime'
-  dependsOn:[
-    m_PlatformServicesDeploy
-    m_SynapseDeploy
-    m_PurviewDeploy
-    m_AIServicesDeploy
-    m_StreamingServicesDeploy
-    m_DataLakeDeploy
-  ]
-  kind: 'AzurePowerShell'
-  location: resourceGroup().location
-  properties: {
-    scriptContent: 'Start-Sleep -Seconds 60'
-    azPowerShellVersion:'6.2'
-    cleanupPreference:'OnSuccess'
-    retentionInterval: 'P1D'
-    timeout:'PT30M'
-  }
-}
-
 //********************************************************
 // RBAC Role Assignments
 //********************************************************
@@ -476,7 +453,6 @@ module m_RBACRoleAssignment 'modules/AzureRBACDeploy.bicep' = {
   name: 'RBACRoleAssignmentDeploy'
   dependsOn:[
     m_ServiceConnectionsDeploy
-    r_WaitTime
   ]
   params: {
     ctrlDeployDataShare: ctrlDeployDataShare
@@ -503,7 +479,12 @@ module m_RBACRoleAssignment 'modules/AzureRBACDeploy.bicep' = {
 module m_VirtualNetworkIntegration 'modules/VirtualNetworkIntegrationDeploy.bicep' = if(networkIsolationMode == 'vNet') {
   name: 'VirtualNetworkIntegration'
   dependsOn:[
-    m_RBACRoleAssignment
+    m_PlatformServicesDeploy
+    m_SynapseDeploy
+    m_PurviewDeploy
+    m_AIServicesDeploy
+    m_StreamingServicesDeploy
+    m_DataLakeDeploy
   ]
   params: {
     ctrlDeployAI: ctrlDeployAI
@@ -580,6 +561,7 @@ module m_PostDeploymentScripts 'modules/PostDeploymentScripts.bicep' = {
   name: 'PostDeploymentScripts'
   dependsOn: [
     m_RBACRoleAssignment
+    m_VirtualNetworkIntegration
   ]
   params: {
     cleanUpPSScriptLocation: cleanUpPSScriptLocation
