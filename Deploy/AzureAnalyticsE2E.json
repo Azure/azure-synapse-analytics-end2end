@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.4.1124.51302",
-      "templateHash": "1619779170364504221"
+      "templateHash": "10845097707384224759"
     }
   },
   "parameters": {
@@ -6713,7 +6713,7 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "PostDeploymentScripts",
+      "name": "PostDeploymentScript",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"

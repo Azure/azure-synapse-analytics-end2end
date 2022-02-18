@@ -558,7 +558,7 @@ var cleanUpPSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6d
 var cleanUpScriptArguments = '-UAMIResourceID ${r_deploymentScriptUAMI.id}'
 
 module m_PostDeploymentScripts 'modules/PostDeploymentScripts.bicep' = {
-  name: 'PostDeploymentScripts'
+  name: 'PostDeploymentScript'
   dependsOn: [
     m_RBACRoleAssignment
     m_VirtualNetworkIntegration
