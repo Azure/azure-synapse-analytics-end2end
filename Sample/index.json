@@ -5,7 +5,7 @@
             "sqlScripts": [
                 {
                     "name": "01 - Explore Open DataSet with SQL Serverless",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/serverless/01.AnalyzeOpenDatasetSQLServerless.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/01.AnalyzeOpenDatasetSQLServerless.sql",
                     "workspaceFolderPath": "OpenDatasets/SQL Serverless",
                     "tokens": [
                         "##azsynapsewks##"
@@ -13,49 +13,49 @@
                 },
                 {
                     "name": "02 - Query Parquet Files",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/serverless/02.QueryParquetFiles.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/02.QueryParquetFiles.sql",
                     "workspaceFolderPath": "OpenDatasets/SQL Serverless",
                     "tokens": []
                 },
                 {
                     "name": "03 - Query CSV Files",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/serverless/03.QueryCSVFiles.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/03.QueryCSVFiles.sql",
                     "workspaceFolderPath": "OpenDatasets/SQL Serverless",
                     "tokens": []
                 },
                 {
                     "name": "04 - Query JSON Files",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/serverless/04.QueryJSONFiles.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/04.QueryJSONFiles.sql",
                     "workspaceFolderPath": "OpenDatasets/SQL Serverless",
                     "tokens": []
                 },
                 {
                     "name": "05 - Query Nested Types in JSON and Parquet Files",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/serverless/05.QueryNestedTypes.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/05.QueryNestedTypes.sql",
                     "workspaceFolderPath": "OpenDatasets/SQL Serverless",
                     "tokens": []
                 },
                 {
                     "name": "06 - Use file metadata in queries",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/serverless/06.UseFileMetadata.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Serverless/06.UseFileMetadata.sql",
                     "workspaceFolderPath": "OpenDatasets/SQL Serverless",
                     "tokens": []
                 },
                 {
                     "name": "01 - Load the New York Taxicab dataset",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/dedicated/01.LoadNYCTaxiDataset.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Dedicated/01.LoadNYCTaxiDataset.sql",
                     "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
                     "tokens": []
                 },
                 {
                     "name": "02 - Row-Level Security for dedicated SQL pools",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/dedicated/02.RowLevelSecurity.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Dedicated/02.RowLevelSecurity.sql",
                     "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
                     "tokens": []
                 },
                 {
                     "name": "03 - Scoring machine learning models in dedicated SQL pool",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/opendatasets/sqlscripts/dedicated/03.ScoreML.sql",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/SQLScripts/Dedicated/03.ScoreML.sql",
                     "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
                     "tokens": []
                 }
