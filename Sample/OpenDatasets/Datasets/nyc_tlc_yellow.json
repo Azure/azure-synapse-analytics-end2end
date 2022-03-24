@@ -1,0 +1,11 @@
+{
+    "name": "nyc_tlc_yellow",
+    "properties": {
+        "type": "AzureBlobStorage",
+        "annotations": [],
+        "typeProperties": {
+            "sasUri": "https://azureopendatastorage.blob.core.windows.net/nyctlc/yellow?r\"\""
+        }
+    },
+    "type": "Microsoft.Synapse/workspaces/linkedservices"
+}

@@ -1,0 +1,103 @@
+[
+    {
+        "template": "OpenDatasets",
+        "artifacts" : {
+            "sqlScripts": [
+                {
+                    "name": "01 - Explore Open DataSet with SQL Serverless",
+                    "definitionFilePath": "./opendatasets/sqlscripts/serverless/01.AnalyzeOpenDatasetSQLServerless.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": [
+                        "##azsynapsewks##"
+                    ]
+                },
+                {
+                    "name": "02 - Query Parquet Files",
+                    "definitionFilePath": "./opendatasets/sqlscripts/serverless/02.QueryParquetFiles.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "03 - Query CSV Files",
+                    "definitionFilePath": "./opendatasets/sqlscripts/serverless/03.QueryCSVFiles.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "04 - Query JSON Files",
+                    "definitionFilePath": "./opendatasets/sqlscripts/serverless/04.QueryJSONFiles.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "05 - Query Nested Types in JSON and Parquet Files",
+                    "definitionFilePath": "./opendatasets/sqlscripts/serverless/05.QueryNestedTypes.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "06 - Use file metadata in queries",
+                    "definitionFilePath": "./opendatasets/sqlscripts/serverless/06.UseFileMetadata.sql",
+                    "workspaceFolderPath": "OpenDatasets/SQL Serverless",
+                    "tokens": []
+                },
+                {
+                    "name": "01 - Load the New York Taxicab dataset",
+                    "definitionFilePath": "./opendatasets/sqlscripts/dedicated/01.LoadNYCTaxiDataset.sql",
+                    "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
+                    "tokens": []
+                },
+                {
+                    "name": "02 - Row-Level Security for dedicated SQL pools",
+                    "definitionFilePath": "./opendatasets/sqlscripts/dedicated/02.RowLevelSecurity.sql",
+                    "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
+                    "tokens": []
+                },
+                {
+                    "name": "03 - Scoring machine learning models in dedicated SQL pool",
+                    "definitionFilePath": "./opendatasets/sqlscripts/dedicated/03.ScoreML.sql",
+                    "workspaceFolderPath": "OpenDatasets/Dedicated SQL",
+                    "tokens": []
+                }
+
+            ],
+            "pipelines": [
+                {
+                    "name": "01 - Getting Started with Delta Lake",
+                    "definitionFilePath": "./opendatasets/notebooks/Getting Started with Delta Lake.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": [],
+                    "datasets":[
+                        {
+                            "name": "nyc_tlc_yellow",
+                            "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
+                            "tokens": []
+                        }
+                    ],
+                    "linkedServices":[
+                        {
+                            "name": "nyc_tlc_yellow",
+                            "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
+                            "tokens": []
+                        }
+                    ]
+                }
+            ],
+            "notebooks": [
+                {
+                    "name": "01 - Getting Started with Delta Lake",
+                    "definitionFilePath": "./opendatasets/notebooks/Getting Started with Delta Lake.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                }
+            ],
+            "linkedServices":[
+                {
+                    "name": "nyc_tlc_yellow",
+                    "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
+                    "tokens": []
+                }
+            ]
+        }
+    }
+]
