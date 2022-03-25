@@ -61,21 +61,8 @@
                 }
 
             ],
-            "pipelines": [
-                {
-                    "name": "01 - Getting Started with Delta Lake",
-                    "definitionFilePath": "./opendatasets/notebooks/Getting Started with Delta Lake.ipynb",
-                    "workspaceFolderPath": "OpenDatasets",
-                    "tokens": []
-                }
-            ],
-            "datasets":[
-                {
-                    "name": "nyc_tlc_yellow",
-                    "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
-                    "tokens": []
-                }
-            ],
+            "pipelines": [],
+            "datasets":[],
             "notebooks": [
                 {
                     "name": "01 - Using Azure Open Datasets in Synapse",
