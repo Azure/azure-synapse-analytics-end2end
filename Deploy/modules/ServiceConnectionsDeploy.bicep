@@ -31,6 +31,9 @@ param synapseSparkPoolName string
 param synapseWorkspaceID string
 param synapseWorkspaceName string
 
+param ctrlDeployCosmosDB bool
+param cosmosDBAccountName string
+
 var storageEnvironmentDNS = environment().suffixes.storage
 
 //Key Vault Access Policy for Synapse
@@ -62,6 +65,10 @@ resource r_anomalyDetector 'Microsoft.CognitiveServices/accounts@2021-10-01' exi
   name: anomalyDetectorAccountName
 }
 
+resource r_cosmosDBAccount 'Microsoft.DocumentDB/databaseAccounts@2021-11-15-preview' existing = {
+  name: cosmosDBAccountName
+}
+
 //Reference existing Key Vault created by CoreServicesDeploy.bicep
 resource r_keyVault 'Microsoft.KeyVault/vaults@2021-04-01-preview' existing = {
   name: keyVaultName
@@ -80,6 +87,14 @@ resource r_anomalyDetectorAccountKey 'Microsoft.KeyVault/vaults/secrets@2021-06-
   parent: r_keyVault
   properties:{
     value: ctrlDeployAI ? listKeys(r_anomalyDetector.id, r_anomalyDetector.apiVersion).key1 : ''
+  }
+}
+
+resource r_cosmosDBConnectionString 'Microsoft.KeyVault/vaults/secrets@2021-06-01-preview' = if(ctrlDeployCosmosDB == true) {
+  name:'${cosmosDBAccountName}-Key'
+  parent: r_keyVault
+  properties:{
+    value:  ctrlDeployCosmosDB ? listConnectionStrings(r_cosmosDBAccount.id, r_cosmosDBAccount.apiVersion).connectionStrings[0].connectionString : ''
   }
 }
 

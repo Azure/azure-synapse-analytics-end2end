@@ -5,6 +5,8 @@ param vNetName string
 param ctrlDeployPurview bool
 param ctrlDeployAI bool
 param ctrlDeployStreaming bool
+param ctrlDeployCosmosDB bool
+
 //param crtlDeployDataShare bool
 
 
@@ -184,6 +186,28 @@ module m_privateDNSZoneCognitiveService 'PrivateDNSZone.bicep' = if(ctrlDeployAI
   }
 }
 
+//CosmosDB DNS Zone: privatelink.documents.azure.com
+//Required by CosmosDB
+module m_privateDNSZoneCosmosDBSQL 'PrivateDNSZone.bicep' = if(ctrlDeployCosmosDB == true) {
+  name: 'PrivateDNSZoneCosmosDBSQL'
+  params: {
+    dnsZoneName: 'privatelink.documents.azure.com'
+    vNetID: vNetID
+    vNetName: vNetName
+  }
+}
+
+//CosmosDB DNS Zone: privatelink.documents.azure.com
+//Required by CosmosDB
+module m_privateDNSZoneCosmosDBAnalytics 'PrivateDNSZone.bicep' = if(ctrlDeployCosmosDB == true) {
+  name: 'PrivateDNSZoneCosmosDBAnalytics'
+  params: {
+    dnsZoneName: 'privatelink.analytics.cosmos.azure.com'
+    vNetID: vNetID
+    vNetName: vNetName
+  }
+}
+
 output storageDFSPrivateDNSZoneID string = m_privateDNSZoneStorageDFS.outputs.dnsZoneID
 output storageBlobPrivateDNSZoneID string = ctrlDeployPurview == true || ctrlDeployAI == true ? m_privateDNSZoneStorageBlob.outputs.dnsZoneID: ''
 output storageQueuePrivateDNSZoneID string = ctrlDeployPurview ? m_privateDNSZoneStorageQueue.outputs.dnsZoneID : ''
@@ -199,3 +223,5 @@ output azureMLAPIPrivateDNSZoneID string = ctrlDeployAI ? m_privateDNSZoneAzureM
 output azureMLNotebooksPrivateDNSZoneID string = ctrlDeployAI ? m_privateDNSZoneAzureMLNotebooks.outputs.dnsZoneID : ''
 output iotHubPrivateDNSZoneID string = ctrlDeployStreaming ? m_privateDNSZoneIoTHub.outputs.dnsZoneID : ''
 output cognitiveServicePrivateDNSZoneID string = ctrlDeployAI ? m_privateDNSZoneCognitiveService.outputs.dnsZoneID : ''
+output cosmosDBSQLPrivateDNSZoneID string = ctrlDeployCosmosDB ? m_privateDNSZoneCosmosDBSQL.outputs.dnsZoneID : ''
+output cosmosDBAnalyticsPrivateDNSZoneID string = ctrlDeployCosmosDB ? m_privateDNSZoneCosmosDBAnalytics.outputs.dnsZoneID : ''

@@ -57,6 +57,7 @@ The target subscription for the deployment accelerator needs to have the followi
 * Microsoft.Devices
 * Microsoft.Insights
 * Microsoft.EventHub
+* Microsoft.DocumentDB
 
 ### Deployment Details
 
@@ -73,10 +74,25 @@ The scope of this deployment accelerator is illustrated in the diagram below.
 
 ![Achitecture Components](./Diagrams/ArchitectureWorkloads.png)
 
-> **Important:** All services are deployed in a single resource group and in the same region as the resource group. Before creating the resource group that will host the workloads, check the [Azure Products by Region](https://azure.microsoft.com/global-infrastructure/services/?products=purview,key-vault,virtual-network,data-share,event-hubs,cognitive-services,storage,iot-hub,container-registry,synapse-analytics,stream-analytics,machine-learning-service&regions=all) and select a region that has all selected services available. The deployment will fail if any of the services is not available in the chosen region.
+> **Important:** All services are deployed in a single resource group and in the same region as the resource group. Before creating the resource group that will host the workloads, check the [Azure Products by Region](https://azure.microsoft.com/global-infrastructure/services/?products=cosmos-db,purview,key-vault,virtual-network,data-share,event-hubs,cognitive-services,storage,iot-hub,container-registry,synapse-analytics,stream-analytics,machine-learning-service&regions=all) and select a region that has all selected services available.
 
+Currently the following regions support the deployment of all services:
 
-> **Important:** For a fully automated deployment and configuration of Synapse Analytics and Purview the deployment accelerator makes use of post-deployment PowerShell scripts to perform data plane operations. The operations executed by these scripts are to execute operations to complement the final environment configuration as not every setring is available through Bicep. Because of these imperative actions executed by the scripts, the template is no longer idempotent and should only be used for initial deployment and configuration. For more details about the scripts see the deployment accelerator documentation.
+* Southeast Asia
+* Australia East
+* Canada Central
+* North Europe
+* West Europe
+* Central India
+* UK South
+* East US
+* East US 2
+* South Central US
+* West US 2
+
+Other Azure regions are supported for partial deployments. The deployment will fail if any of the services selected is not available in the chosen Azure region.
+
+> **Important:** For a fully automated deployment and configuration of Synapse Analytics and Purview the deployment accelerator makes use of post-deployment PowerShell scripts to perform data plane operations. The operations executed by these scripts are to execute operations to complement the final environment configuration as not every setting is available through Bicep. Because of these imperative actions executed by the scripts, the template is no longer idempotent and should only be used for initial deployment and configuration. For more details about the scripts see the deployment accelerator documentation.
 
 The default pricing tier for all services are provisioned are their lowest possible to meet the initial deployment requirements. If you choose to provide different different values to the input parameters, please observe the pricing information for each service in the table below.
 
@@ -136,6 +152,12 @@ azeventhubns*suffix*           |Event Hub namespace        | [Basic](https://azu
 aziothub*suffix*               |IoT Hub                    | [Free](https://azure.microsoft.com/pricing/details/iot-hub/)               | Yes          |
 azstreamjob*suffix*            |Stream Analytics job       | [Standard](https://azure.microsoft.com/pricing/details/stream-analytics/)  | Yes          |
 
+#### Operational Databases
+
+Name                           | Type                      | Default Pricing Tier                                                                |Conditional  |Notes
+-------------------------------|---------------------------|-------------------------------------------------------------------------------------|-------------|------------
+azcosmosdb*suffix*             |Cosmos DB account          | [Serverless](https://azure.microsoft.com/pricing/details/cosmos-db)                 | Yes         |
+
 ## Integration and Permissions
 
 ![Integration and Permissions](./Diagrams/IntegrationPermissions.png)
@@ -168,6 +190,7 @@ ID                                  | From Service         | To Service         
 ![Blue15](./docs/images/Blue15.png) | azmlwks*suffix*      | azsynapsewks*suffix*                               | Linked Service       | [Link Azure Synapse Analytics and Azure Machine Learning workspaces and attach Apache Spark pools](https://docs.microsoft.com/azure/machine-learning/how-to-link-synapse-ml-workspaces)
 ![Blue16](./docs/images/Blue16.png) | azmlwks*suffix*      | azrawdatalake*suffix*, azcurateddatalake*suffix*   | Datastore            | [Connect to storage services on Azure](https://docs.microsoft.com/azure/machine-learning/how-to-access-data)
 ![Blue17](./docs/images/Blue17.png) | azeventhubns*suffix* | azrawdatalake*suffix*                              | Event Capture        | [Capture events through Azure Event Hubs in Azure Blob Storage or Azure Data Lake Storage](https://docs.microsoft.com/azure/event-hubs/event-hubs-capture-overview)
+![Blue18](./docs/images/Blue18.png) | azsynapsewks*suffix* | azcosmosdb   *suffix*                              | Linked Service       | [Connect to Azure Synapse Link for Azure Cosmos DB](https://docs.microsoft.com/azure/synapse-analytics/synapse-link/how-to-connect-synapse-link-cosmos-db)
 
 ### Azure Role Based Access Control (RBAC) Permissions
 
@@ -198,6 +221,7 @@ ID                                    | Granted to Service   | Granted On Servic
 ![Red03](./docs/images/Red03.png)     | azmlwks*suffix*      | azsynapsewks*suffix*                               | Synapse Apache Spark Administrator | [Link Azure Synapse Analytics and Azure Machine Learning workspaces and attach Apache Spark pools](https://docs.microsoft.com/azure/machine-learning/how-to-link-synapse-ml-workspaces)
 ![Red04](./docs/images/Red04.png)     | azsynapewks*suffix*  | azpurview*suffix*                                  | Data Curator                       | [Connect a Synapse workspace to an Azure Purview account](https://docs.microsoft.com/azure/synapse-analytics/catalog-and-governance/quickstart-connect-azure-purview#set-up-authentication)
 ![Red05](./docs/images/Red05.png)     | azdatashare*suffix*  | azpurview*suffix*                                  | Data Curator                       | [How to connect Azure Data Share and Azure Purview](https://docs.microsoft.com/azure/purview/how-to-link-azure-data-share)
+![Red06](./docs/images/Red06.png)     | azsynapsewks*suffix*  | azcosmosdb*suffix*                                | Cosmos DB Built In Data Contributor| [HConfigure role-based access control with Azure Active Directory for your Azure Cosmos DB account](https://docs.microsoft.com/azure/cosmos-db/how-to-setup-rbac#built-in-role-definitions)
 
 ## Networking Architecture
 
@@ -230,6 +254,8 @@ Data Governance  |privatelink.servicebus.windows.net |Private DNS Zone         |
 Data Governance  |privatelink.blob.core.windows.net  |Private DNS Zone         |Yes
 Data Governance  |privatelink.purview.azure.com      |Private DNS Zone         |Yes
 Streaming        |privatelink.azure-devices.net      |Private DNS Zone         |Yes
+Operational DB   |privatelink.documents.azure.com    |Private DNS Zone         |Yes
+Operational DB   |privatelink.analytics.cosmos.azure.com    |Private DNS Zone  |Yes
 Synapse Analytics|azvnet*suffix*                     |Virtual Network          |No
 Synapse Analytics|azsynapsehub*suffix*               |Synapse private link hub |No
 Synapse Analytics|azsynapsewks*suffix*-web           |Private Endpoint         |No
@@ -274,6 +300,7 @@ AI               |azmlcontainerreg*suffix*       |Container registry         | !
 Streaming        |azeventhubns*suffix*           |Event Hub namespace        | ![1](./docs/images/PublicNetworkAccessDisabled.png) ![2](./docs/images/AllowAzureServices.png)                                       |                                                                                                                               |[Network security for Azure Event Hubs](https://docs.microsoft.com/azure/event-hubs/network-security)
 Streaming        |aziothub*suffix*               |IoT Hub                    | ![1](./docs/images/PublicNetworkAccessDisabled.png)                                                                                                                                 |                                                                                                                               |[IoT Hub support for virtual networks with Private Link and Managed Identity](https://docs.microsoft.com/azure/iot-hub/virtual-network-support)
 Streaming        |azstreamjob*suffix*            |Stream Analytics job       |                                                                                                                                      |Stream Analytics Jobs don't support vNet integration. For that you should use [Stream Analytics Clusters](https://docs.microsoft.com/azure/stream-analytics/cluster-overview)|
+Operational DB   |azcosmosdb*suffix*             |Cosmos DB account          | ![1](./docs/images/PublicNetworkAccessDisabled.png) ![2](./docs/images/AllowAzureServices.png)                                       |                                                                                                                               |[Configure Azure Private Link for Azure Cosmos DB analytical store](https://docs.microsoft.com/azure/cosmos-db/analytical-store-private-endpoints)
 
 ## Contributing
 

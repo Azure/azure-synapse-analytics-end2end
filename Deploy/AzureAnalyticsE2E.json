@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.4.1124.51302",
-      "templateHash": "10845097707384224759"
+      "version": "0.4.1318.3566",
+      "templateHash": "16984614184201320067"
     }
   },
   "parameters": {
@@ -29,7 +29,7 @@
     },
     "uniqueSuffix": {
       "type": "string",
-      "defaultValue": "[substring(uniqueString(resourceGroup().id), 0, 5)]",
+      "defaultValue": "[substring(uniqueString(resourceGroup().id), 0, 6)]",
       "metadata": {
         "description": "Unique Suffix"
       }
@@ -53,6 +53,25 @@
     "ctrlDeployPrivateDNSZones": {
       "type": "bool",
       "defaultValue": true
+    },
+    "ctrlDeployOperationalDB": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ctrlDeployCosmosDB": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "ctrlDeploySampleArtifacts": {
+      "type": "bool",
+      "defaultValue": false
+    },
+    "sampleArtifactCollectionName": {
+      "type": "string",
+      "defaultValue": "OpenDatasets",
+      "allowedValues": [
+        "OpenDatasets"
+      ]
     },
     "ctrlNewOrExistingVNet": {
       "type": "string",
@@ -428,6 +447,20 @@
       "metadata": {
         "description": "Azure Stream Analytics Job Name"
       }
+    },
+    "cosmosDBAccountName": {
+      "type": "string",
+      "defaultValue": "[format('azcosmosdb{0}', parameters('uniqueSuffix'))]",
+      "metadata": {
+        "description": "CosmosDB Account Name"
+      }
+    },
+    "cosmosDBDatabaseName": {
+      "type": "string",
+      "defaultValue": "OperationalDB",
+      "metadata": {
+        "description": "CosmosDB Database Name"
+      }
     }
   },
   "variables": {
@@ -442,6 +475,7 @@
     ],
     "synapsePSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9TeW5hcHNlUG9zdERlcGxveS5wczE=",
     "azMLWorkspaceName": "[if(parameters('ctrlDeployAI'), format('-AzMLWorkspaceName {0}', parameters('azureMLWorkspaceName')), '')]",
+    "sampleArtifactsParams": "[if(parameters('ctrlDeploySampleArtifacts'), format('-CtrlDeploySampleArtifacts $True -SampleArtifactCollectioName {0}', parameters('sampleArtifactCollectionName')), '')]",
     "purviewPSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9QdXJ2aWV3UG9zdERlcGxveS5wczE=",
     "datalakeAccountPurviewParams": "[format('-WorkspaceDataLakeAccountName {0} -RawDataLakeAccountName {1} -CuratedDataLakeAccountName {2}', parameters('workspaceDataLakeAccountName'), parameters('rawDataLakeAccountName'), parameters('curatedDataLakeAccountName'))]",
     "cleanUpPSScriptLocation": "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9DbGVhblVwUG9zdERlcGxveS5wczE=",
@@ -495,8 +529,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "12341185777581326107"
+              "version": "0.4.1318.3566",
+              "templateHash": "12383556341900239341"
             }
           },
           "parameters": {
@@ -711,8 +745,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "9462214655377215773"
+              "version": "0.4.1318.3566",
+              "templateHash": "16192212433261134689"
             }
           },
           "parameters": {
@@ -1065,8 +1099,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "642384389887648269"
+              "version": "0.4.1318.3566",
+              "templateHash": "3047530362003565028"
             }
           },
           "parameters": {
@@ -1174,7 +1208,7 @@
             "value": "[parameters('textAnalyticsAccountName')]"
           },
           "keyVaultID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.keyVaultID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.keyVaultID.value]"
           },
           "resourceLocation": {
             "value": "[parameters('resourceLocation')]"
@@ -1189,8 +1223,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "12919502253873814712"
+              "version": "0.4.1318.3566",
+              "templateHash": "11989398751535545565"
             }
           },
           "parameters": {
@@ -1430,8 +1464,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "16029609333153040317"
+              "version": "0.4.1318.3566",
+              "templateHash": "13631203414358893760"
             }
           },
           "parameters": {
@@ -1515,7 +1549,7 @@
             "value": "[parameters('networkIsolationMode')]"
           },
           "subNetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.subnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.subnetID.value]"
           }
         },
         "template": {
@@ -1524,8 +1558,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "11166890114685531331"
+              "version": "0.4.1318.3566",
+              "templateHash": "8632029022895133091"
             }
           },
           "parameters": {
@@ -1751,7 +1785,7 @@
             "value": "[if(parameters('ctrlDeployStreaming'), reference(resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy'), '2020-10-01').outputs.streamAnalyticsJobID.value, '')]"
           },
           "synapseWorkspaceResourceID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceID.value]"
           },
           "azureMLWorkspaceResourceID": {
             "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.azureMLWorkspaceID.value, '')]"
@@ -1778,8 +1812,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "15348737733108463412"
+              "version": "0.4.1318.3566",
+              "templateHash": "14739155697116090232"
             }
           },
           "parameters": {
@@ -1941,6 +1975,149 @@
       ]
     },
     {
+      "condition": "[parameters('ctrlDeployOperationalDB')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-10-01",
+      "name": "OperationalDatabasesDeploy",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "networkIsolationMode": {
+            "value": "[parameters('networkIsolationMode')]"
+          },
+          "cosmosDBAccountName": {
+            "value": "[parameters('cosmosDBAccountName')]"
+          },
+          "cosmosDBDatabaseName": {
+            "value": "[parameters('cosmosDBDatabaseName')]"
+          },
+          "resourceLocation": {
+            "value": "[parameters('resourceLocation')]"
+          },
+          "ctrlDeployCosmosDB": {
+            "value": "[parameters('ctrlDeployCosmosDB')]"
+          },
+          "synapseWorkspaceID": {
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceID.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.4.1318.3566",
+              "templateHash": "3850527714335185806"
+            }
+          },
+          "parameters": {
+            "resourceLocation": {
+              "type": "string"
+            },
+            "networkIsolationMode": {
+              "type": "string"
+            },
+            "synapseWorkspaceID": {
+              "type": "string"
+            },
+            "ctrlDeployCosmosDB": {
+              "type": "bool",
+              "defaultValue": true
+            },
+            "cosmosDBAccountName": {
+              "type": "string"
+            },
+            "cosmosDBDatabaseName": {
+              "type": "string"
+            }
+          },
+          "resources": [
+            {
+              "condition": "[equals(parameters('ctrlDeployCosmosDB'), true())]",
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+              "apiVersion": "2021-10-15",
+              "name": "[format('{0}/{1}', parameters('cosmosDBAccountName'), parameters('cosmosDBDatabaseName'))]",
+              "properties": {
+                "resource": {
+                  "id": "[parameters('cosmosDBDatabaseName')]"
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName'))]"
+              ]
+            },
+            {
+              "condition": "[equals(parameters('ctrlDeployCosmosDB'), true())]",
+              "type": "Microsoft.DocumentDB/databaseAccounts",
+              "apiVersion": "2021-10-15",
+              "name": "[parameters('cosmosDBAccountName')]",
+              "kind": "GlobalDocumentDB",
+              "location": "[parameters('resourceLocation')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "databaseAccountOfferType": "Standard",
+                "locations": [
+                  {
+                    "failoverPriority": 0,
+                    "locationName": "[parameters('resourceLocation')]"
+                  }
+                ],
+                "backupPolicy": {
+                  "type": "Periodic",
+                  "periodicModeProperties": {
+                    "backupIntervalInMinutes": 240,
+                    "backupRetentionIntervalInHours": 8,
+                    "backupStorageRedundancy": "Local"
+                  }
+                },
+                "networkAclBypass": "AzureServices",
+                "networkAclBypassResourceIds": [
+                  "[parameters('synapseWorkspaceID')]"
+                ],
+                "enableAnalyticalStorage": true,
+                "publicNetworkAccess": "[if(equals(parameters('networkIsolationMode'), 'vNet'), 'Disabled', 'Enabled')]",
+                "analyticalStorageConfiguration": {
+                  "schemaType": "WellDefined"
+                },
+                "capabilities": [
+                  {
+                    "name": "EnableServerless"
+                  }
+                ]
+              }
+            }
+          ],
+          "outputs": {
+            "cosmosDBAccountID": {
+              "type": "string",
+              "value": "[if(parameters('ctrlDeployCosmosDB'), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '')]"
+            },
+            "cosmosDBAccountName": {
+              "type": "string",
+              "value": "[if(parameters('ctrlDeployCosmosDB'), parameters('cosmosDBAccountName'), '')]"
+            },
+            "cosmosDBDatabaseName": {
+              "type": "string",
+              "value": "[if(parameters('ctrlDeployCosmosDB'), parameters('cosmosDBDatabaseName'), '')]"
+            },
+            "cosmosDBAccountEndpoint": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2021-10-15').documentEndpoint]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')]"
+      ]
+    },
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
       "name": "ServiceConnectionsDeploy",
@@ -1966,22 +2143,22 @@
             "value": "[parameters('ctrlDeploySynapseSparkPool')]"
           },
           "keyVaultName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.keyVaultName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.keyVaultName.value]"
           },
           "purviewIdentityPrincipalID": {
             "value": "[if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewIdentityPrincipalID.value, '')]"
           },
           "synapseWorkspaceIdentityPrincipalID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceIdentityPrincipalID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceIdentityPrincipalID.value]"
           },
           "azureMLWorkspaceName": {
             "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.azureMLWorkspaceName.value, parameters('azureMLWorkspaceName'))]"
           },
           "curatedDataLakeAccountName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.curatedDataLakeStorageAccountName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.curatedDataLakeStorageAccountName.value]"
           },
           "rawDataLakeAccountName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.rawDataLakeStorageAccountName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.rawDataLakeStorageAccountName.value]"
           },
           "curatedDataLakeZoneContainerNames": {
             "value": "[variables('curatedDataLakeZoneContainerNames')]"
@@ -1999,7 +2176,7 @@
             "value": "[parameters('eventHubPartitionCount')]"
           },
           "rawDataLakeAccountID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.rawDataLakeStorageAccountID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.rawDataLakeStorageAccountID.value]"
           },
           "anomalyDetectorAccountName": {
             "value": "[parameters('anomalyDetectorName')]"
@@ -2008,22 +2185,28 @@
             "value": "[parameters('resourceLocation')]"
           },
           "synapseWorkspaceID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceID.value]"
           },
           "synapseWorkspaceName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceName.value]"
           },
           "synapseSparkPoolID": {
-            "value": "[if(parameters('ctrlDeploySynapseSparkPool'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceSparkID.value, '')]"
+            "value": "[if(parameters('ctrlDeploySynapseSparkPool'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceSparkID.value, '')]"
           },
           "synapseSparkPoolName": {
-            "value": "[if(parameters('ctrlDeploySynapseSparkPool'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceSparkName.value, parameters('synapseSparkPoolName'))]"
+            "value": "[if(parameters('ctrlDeploySynapseSparkPool'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceSparkName.value, parameters('synapseSparkPoolName'))]"
           },
           "textAnalyticsAccountName": {
             "value": "[parameters('textAnalyticsAccountName')]"
           },
           "uamiPrincipalID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.deploymentScriptUAMIPrincipalID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.deploymentScriptUAMIPrincipalID.value]"
+          },
+          "cosmosDBAccountName": {
+            "value": "[if(parameters('ctrlDeployCosmosDB'), reference(resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy'), '2020-10-01').outputs.cosmosDBAccountName.value, '')]"
+          },
+          "ctrlDeployCosmosDB": {
+            "value": "[parameters('ctrlDeployCosmosDB')]"
           }
         },
         "template": {
@@ -2032,8 +2215,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "1598510935601907319"
+              "version": "0.4.1318.3566",
+              "templateHash": "7015537909029604373"
             }
           },
           "parameters": {
@@ -2110,6 +2293,12 @@
               "type": "string"
             },
             "synapseWorkspaceName": {
+              "type": "string"
+            },
+            "ctrlDeployCosmosDB": {
+              "type": "bool"
+            },
+            "cosmosDBAccountName": {
               "type": "string"
             }
           },
@@ -2215,6 +2404,15 @@
               }
             },
             {
+              "condition": "[equals(parameters('ctrlDeployCosmosDB'), true())]",
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2021-06-01-preview",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), format('{0}-Key', parameters('cosmosDBAccountName')))]",
+              "properties": {
+                "value": "[if(parameters('ctrlDeployCosmosDB'), listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), '2021-11-15-preview').connectionStrings[0].connectionString, '')]"
+              }
+            },
+            {
               "condition": "[and(equals(parameters('ctrlDeployAI'), true()), equals(parameters('ctrlSynapseDeploySparkPool'), true()))]",
               "type": "Microsoft.MachineLearningServices/workspaces/computes",
               "apiVersion": "2021-04-01",
@@ -2261,8 +2459,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "1187717508493142859"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "14401933013301871296"
                     }
                   },
                   "parameters": {
@@ -2321,8 +2519,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17096914396444820714"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "8716605214921509717"
                     }
                   },
                   "parameters": {
@@ -2372,6 +2570,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PurviewDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy')]",
@@ -2413,7 +2612,7 @@
             "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.azureMLWorkspaceName.value, '')]"
           },
           "azureMLSynapseLinkedServicePrincipalID": {
-            "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'ServiceConnectionsDeploy'), '2020-10-01').outputs.azureMLSynapseLinkedServicePrincipalID.value, '')]"
+            "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'ServiceConnectionsDeploy')).outputs.azureMLSynapseLinkedServicePrincipalID.value, '')]"
           },
           "curatedDataLakeAccountName": {
             "value": "[parameters('curatedDataLakeAccountName')]"
@@ -2422,13 +2621,13 @@
             "value": "[parameters('rawDataLakeAccountName')]"
           },
           "synapseWorkspaceName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceName.value]"
           },
           "synapseWorkspaceIdentityPrincipalID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceIdentityPrincipalID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceIdentityPrincipalID.value]"
           },
           "UAMIPrincipalID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.deploymentScriptUAMIPrincipalID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.deploymentScriptUAMIPrincipalID.value]"
           },
           "iotHubPrincipalID": {
             "value": "[if(parameters('ctrlDeployStreaming'), reference(resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy'), '2020-10-01').outputs.iotHubPrincipalID.value, '')]"
@@ -2438,6 +2637,18 @@
           },
           "purviewAccountName": {
             "value": "[parameters('purviewAccountName')]"
+          },
+          "ctrlDeployOperationalDB": {
+            "value": "[parameters('ctrlDeployOperationalDB')]"
+          },
+          "ctrlDeployCosmosDB": {
+            "value": "[parameters('ctrlDeployCosmosDB')]"
+          },
+          "cosmosDBAccountName": {
+            "value": "[parameters('cosmosDBAccountName')]"
+          },
+          "cosmosDBDatabaseName": {
+            "value": "[parameters('cosmosDBDatabaseName')]"
           }
         },
         "template": {
@@ -2446,8 +2657,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "4938274161668025246"
+              "version": "0.4.1318.3566",
+              "templateHash": "11572975799673422229"
             }
           },
           "parameters": {
@@ -2461,6 +2672,12 @@
               "type": "bool"
             },
             "ctrlDeployStreaming": {
+              "type": "bool"
+            },
+            "ctrlDeployOperationalDB": {
+              "type": "bool"
+            },
+            "ctrlDeployCosmosDB": {
               "type": "bool"
             },
             "rawDataLakeAccountName": {
@@ -2501,6 +2718,12 @@
             },
             "iotHubPrincipalID": {
               "type": "string"
+            },
+            "cosmosDBAccountName": {
+              "type": "string"
+            },
+            "cosmosDBDatabaseName": {
+              "type": "string"
             }
           },
           "variables": {
@@ -2508,7 +2731,8 @@
             "azureRBACStorageBlobDataContributorRoleID": "ba92f5b4-2d11-453d-a403-e96b0029c9fe",
             "azureRBACContributorRoleID": "b24988ac-6180-42a0-ab88-20f7382dd24c",
             "azureRBACOwnerRoleID": "8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
-            "azureRBACReaderRoleID": "acdd72a7-3385-48ef-bd42-f606fba81ae7"
+            "azureRBACReaderRoleID": "acdd72a7-3385-48ef-bd42-f606fba81ae7",
+            "cosmosDBDataContributorRoleID": "00000000-0000-0000-0000-000000000002"
           },
           "resources": [
             {
@@ -2684,6 +2908,17 @@
                 "principalId": "[if(parameters('ctrlDeployPurview'), parameters('purviewIdentityPrincipalID'), '')]",
                 "principalType": "ServicePrincipal"
               }
+            },
+            {
+              "condition": "[and(parameters('ctrlDeployOperationalDB'), parameters('ctrlDeployCosmosDB'))]",
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+              "apiVersion": "2021-10-15",
+              "name": "[format('{0}/{1}', parameters('cosmosDBAccountName'), guid('d9b6b1c6-7e97-4693-b58a-5d1a567d413f', subscription().subscriptionId, resourceGroup().id))]",
+              "properties": {
+                "principalId": "[reference(resourceId('Microsoft.Synapse/workspaces', parameters('synapseWorkspaceName')), '2021-06-01', 'full').identity.principalId]",
+                "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/{1}', if(parameters('ctrlDeployCosmosDB'), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), ''), variables('cosmosDBDataContributorRoleID'))]",
+                "scope": "[format('{0}/dbs/{1}', if(parameters('ctrlDeployCosmosDB'), resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDBAccountName')), ''), parameters('cosmosDBDatabaseName'))]"
+              }
             }
           ]
         }
@@ -2691,6 +2926,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'DataShareDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PurviewDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'ServiceConnectionsDeploy')]",
@@ -2728,10 +2964,10 @@
             "value": "[parameters('vNetName')]"
           },
           "subnetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.subnetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.subnetID.value]"
           },
           "vNetID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.vNetID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.vNetID.value]"
           },
           "anomalyDetectorAccountID": {
             "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.anomalyDetectorAccountID.value, '')]"
@@ -2758,10 +2994,10 @@
             "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.azureMLWorkspaceName.value, '')]"
           },
           "curatedDataLakeAccountID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.curatedDataLakeStorageAccountID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.curatedDataLakeStorageAccountID.value]"
           },
           "curatedDataLakeAccountName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.curatedDataLakeStorageAccountName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.curatedDataLakeStorageAccountName.value]"
           },
           "eventHubNamespaceID": {
             "value": "[if(parameters('ctrlDeployStreaming'), reference(resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy'), '2020-10-01').outputs.eventHubNamespaceID.value, '')]"
@@ -2776,10 +3012,10 @@
             "value": "[if(parameters('ctrlDeployStreaming'), reference(resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy'), '2020-10-01').outputs.iotHubName.value, '')]"
           },
           "keyVaultID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.keyVaultID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.keyVaultID.value]"
           },
           "keyVaultName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.keyVaultName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.keyVaultName.value]"
           },
           "purviewAccountID": {
             "value": "[if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewAccountID.value, '')]"
@@ -2794,10 +3030,10 @@
             "value": "[if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewManagedStorageAccountID.value, '')]"
           },
           "rawDataLakeAccountID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.rawDataLakeStorageAccountID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.rawDataLakeStorageAccountID.value]"
           },
           "rawDataLakeAccountName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.rawDataLakeStorageAccountName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.rawDataLakeStorageAccountName.value]"
           },
           "resourceLocation": {
             "value": "[parameters('resourceLocation')]"
@@ -2806,10 +3042,10 @@
             "value": "[parameters('synapsePrivateLinkHubName')]"
           },
           "synapseWorkspaceID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceID.value]"
           },
           "synapseWorkspaceName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceName.value]"
           },
           "textAnalyticsAccountID": {
             "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.textAnalyticsAccountID.value, '')]"
@@ -2818,10 +3054,19 @@
             "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.textAnalyticsAccountName.value, '')]"
           },
           "workspaceDataLakeAccountID": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.workspaceDataLakeAccountID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.workspaceDataLakeAccountID.value]"
           },
           "workspaceDataLakeAccountName": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.workspaceDataLakeAccountName.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.workspaceDataLakeAccountName.value]"
+          },
+          "cosmosDBAccountID": {
+            "value": "[if(and(parameters('ctrlDeployOperationalDB'), parameters('ctrlDeployCosmosDB')), reference(resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy'), '2020-10-01').outputs.cosmosDBAccountID.value, '')]"
+          },
+          "cosmosDBAccountName": {
+            "value": "[if(and(parameters('ctrlDeployOperationalDB'), parameters('ctrlDeployCosmosDB')), reference(resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy'), '2020-10-01').outputs.cosmosDBAccountName.value, '')]"
+          },
+          "ctrlDeployCosmosDB": {
+            "value": "[parameters('ctrlDeployCosmosDB')]"
           }
         },
         "template": {
@@ -2830,8 +3075,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "6917157471274213045"
+              "version": "0.4.1318.3566",
+              "templateHash": "4427890687416933398"
             }
           },
           "parameters": {
@@ -2857,6 +3102,9 @@
               "type": "bool"
             },
             "ctrlDeployStreaming": {
+              "type": "bool"
+            },
+            "ctrlDeployCosmosDB": {
               "type": "bool"
             },
             "ctrlStreamIngestionService": {
@@ -2948,6 +3196,12 @@
             },
             "azureMLWorkspaceName": {
               "type": "string"
+            },
+            "cosmosDBAccountID": {
+              "type": "string"
+            },
+            "cosmosDBAccountName": {
+              "type": "string"
             }
           },
           "variables": {
@@ -2985,6 +3239,9 @@
                   },
                   "ctrlDeployStreaming": {
                     "value": "[parameters('ctrlDeployStreaming')]"
+                  },
+                  "ctrlDeployCosmosDB": {
+                    "value": "[parameters('ctrlDeployCosmosDB')]"
                   }
                 },
                 "template": {
@@ -2993,8 +3250,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "9961215451953458710"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "6188131834985682302"
                     }
                   },
                   "parameters": {
@@ -3011,6 +3268,9 @@
                       "type": "bool"
                     },
                     "ctrlDeployStreaming": {
+                      "type": "bool"
+                    },
+                    "ctrlDeployCosmosDB": {
                       "type": "bool"
                     }
                   },
@@ -3044,8 +3304,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3118,8 +3378,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3192,8 +3452,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3266,8 +3526,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3339,8 +3599,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3412,8 +3672,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3485,8 +3745,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3558,8 +3818,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3632,8 +3892,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3706,8 +3966,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3780,8 +4040,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3854,8 +4114,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -3928,8 +4188,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -4002,8 +4262,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -4076,8 +4336,8 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -4150,8 +4410,156 @@
                           "metadata": {
                             "_generator": {
                               "name": "bicep",
-                              "version": "0.4.1124.51302",
-                              "templateHash": "14249401799948155474"
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
+                            }
+                          },
+                          "parameters": {
+                            "dnsZoneName": {
+                              "type": "string"
+                            },
+                            "vNetName": {
+                              "type": "string"
+                            },
+                            "vNetID": {
+                              "type": "string"
+                            }
+                          },
+                          "resources": [
+                            {
+                              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                              "apiVersion": "2020-06-01",
+                              "name": "[format('{0}/{1}', parameters('dnsZoneName'), format('{0}-{1}', parameters('dnsZoneName'), parameters('vNetName')))]",
+                              "location": "global",
+                              "properties": {
+                                "virtualNetwork": {
+                                  "id": "[parameters('vNetID')]"
+                                },
+                                "registrationEnabled": false
+                              },
+                              "dependsOn": [
+                                "[resourceId('Microsoft.Network/privateDnsZones', parameters('dnsZoneName'))]"
+                              ]
+                            },
+                            {
+                              "type": "Microsoft.Network/privateDnsZones",
+                              "apiVersion": "2020-06-01",
+                              "name": "[parameters('dnsZoneName')]",
+                              "location": "global"
+                            }
+                          ],
+                          "outputs": {
+                            "dnsZoneID": {
+                              "type": "string",
+                              "value": "[resourceId('Microsoft.Network/privateDnsZones', parameters('dnsZoneName'))]"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "condition": "[equals(parameters('ctrlDeployCosmosDB'), true())]",
+                      "type": "Microsoft.Resources/deployments",
+                      "apiVersion": "2020-10-01",
+                      "name": "PrivateDNSZoneCosmosDBSQL",
+                      "properties": {
+                        "expressionEvaluationOptions": {
+                          "scope": "inner"
+                        },
+                        "mode": "Incremental",
+                        "parameters": {
+                          "dnsZoneName": {
+                            "value": "privatelink.documents.azure.com"
+                          },
+                          "vNetID": {
+                            "value": "[parameters('vNetID')]"
+                          },
+                          "vNetName": {
+                            "value": "[parameters('vNetName')]"
+                          }
+                        },
+                        "template": {
+                          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                          "contentVersion": "1.0.0.0",
+                          "metadata": {
+                            "_generator": {
+                              "name": "bicep",
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
+                            }
+                          },
+                          "parameters": {
+                            "dnsZoneName": {
+                              "type": "string"
+                            },
+                            "vNetName": {
+                              "type": "string"
+                            },
+                            "vNetID": {
+                              "type": "string"
+                            }
+                          },
+                          "resources": [
+                            {
+                              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+                              "apiVersion": "2020-06-01",
+                              "name": "[format('{0}/{1}', parameters('dnsZoneName'), format('{0}-{1}', parameters('dnsZoneName'), parameters('vNetName')))]",
+                              "location": "global",
+                              "properties": {
+                                "virtualNetwork": {
+                                  "id": "[parameters('vNetID')]"
+                                },
+                                "registrationEnabled": false
+                              },
+                              "dependsOn": [
+                                "[resourceId('Microsoft.Network/privateDnsZones', parameters('dnsZoneName'))]"
+                              ]
+                            },
+                            {
+                              "type": "Microsoft.Network/privateDnsZones",
+                              "apiVersion": "2020-06-01",
+                              "name": "[parameters('dnsZoneName')]",
+                              "location": "global"
+                            }
+                          ],
+                          "outputs": {
+                            "dnsZoneID": {
+                              "type": "string",
+                              "value": "[resourceId('Microsoft.Network/privateDnsZones', parameters('dnsZoneName'))]"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "condition": "[equals(parameters('ctrlDeployCosmosDB'), true())]",
+                      "type": "Microsoft.Resources/deployments",
+                      "apiVersion": "2020-10-01",
+                      "name": "PrivateDNSZoneCosmosDBAnalytics",
+                      "properties": {
+                        "expressionEvaluationOptions": {
+                          "scope": "inner"
+                        },
+                        "mode": "Incremental",
+                        "parameters": {
+                          "dnsZoneName": {
+                            "value": "privatelink.analytics.cosmos.azure.com"
+                          },
+                          "vNetID": {
+                            "value": "[parameters('vNetID')]"
+                          },
+                          "vNetName": {
+                            "value": "[parameters('vNetName')]"
+                          }
+                        },
+                        "template": {
+                          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                          "contentVersion": "1.0.0.0",
+                          "metadata": {
+                            "_generator": {
+                              "name": "bicep",
+                              "version": "0.4.1318.3566",
+                              "templateHash": "15150591230333544452"
                             }
                           },
                           "parameters": {
@@ -4201,7 +4609,7 @@
                   "outputs": {
                     "storageDFSPrivateDNSZoneID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneStorageDFS'), '2020-10-01').outputs.dnsZoneID.value]"
+                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneStorageDFS')).outputs.dnsZoneID.value]"
                     },
                     "storageBlobPrivateDNSZoneID": {
                       "type": "string",
@@ -4217,19 +4625,19 @@
                     },
                     "synapseSQLPrivateDNSZoneID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneSynapseSQL'), '2020-10-01').outputs.dnsZoneID.value]"
+                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneSynapseSQL')).outputs.dnsZoneID.value]"
                     },
                     "synapseDevPrivateDNSZoneID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneSynapseDev'), '2020-10-01').outputs.dnsZoneID.value]"
+                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneSynapseDev')).outputs.dnsZoneID.value]"
                     },
                     "synapseWebPrivateDNSZoneID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneSynapseWeb'), '2020-10-01').outputs.dnsZoneID.value]"
+                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneSynapseWeb')).outputs.dnsZoneID.value]"
                     },
                     "keyVaultPrivateDNSZoneID": {
                       "type": "string",
-                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneKeyVault'), '2020-10-01').outputs.dnsZoneID.value]"
+                      "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneKeyVault')).outputs.dnsZoneID.value]"
                     },
                     "serviceBusPrivateDNSZoneID": {
                       "type": "string",
@@ -4258,6 +4666,14 @@
                     "cognitiveServicePrivateDNSZoneID": {
                       "type": "string",
                       "value": "[if(parameters('ctrlDeployAI'), reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneCognitiveService'), '2020-10-01').outputs.dnsZoneID.value, '')]"
+                    },
+                    "cosmosDBSQLPrivateDNSZoneID": {
+                      "type": "string",
+                      "value": "[if(parameters('ctrlDeployCosmosDB'), reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneCosmosDBSQL'), '2020-10-01').outputs.dnsZoneID.value, '')]"
+                    },
+                    "cosmosDBAnalyticsPrivateDNSZoneID": {
+                      "type": "string",
+                      "value": "[if(parameters('ctrlDeployCosmosDB'), reference(resourceId('Microsoft.Resources/deployments', 'PrivateDNSZoneCosmosDBAnalytics'), '2020-10-01').outputs.dnsZoneID.value, '')]"
                     }
                   }
                 }
@@ -4308,8 +4724,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -4423,8 +4839,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -4538,8 +4954,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -4653,8 +5069,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -4769,8 +5185,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -4884,8 +5300,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -4999,8 +5415,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5114,8 +5530,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5230,8 +5646,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5346,8 +5762,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5462,8 +5878,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5578,8 +5994,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5694,8 +6110,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5810,8 +6226,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -5926,8 +6342,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -6042,8 +6458,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -6158,8 +6574,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -6274,8 +6690,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -6390,8 +6806,124 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
+                    }
+                  },
+                  "parameters": {
+                    "privateEndpoitName": {
+                      "type": "string"
+                    },
+                    "resourceLocation": {
+                      "type": "string"
+                    },
+                    "privateLinkServiceId": {
+                      "type": "string"
+                    },
+                    "groupID": {
+                      "type": "string"
+                    },
+                    "subnetID": {
+                      "type": "string"
+                    },
+                    "deployDNSZoneGroup": {
+                      "type": "bool",
+                      "defaultValue": true
+                    },
+                    "privateDNSZoneConfigs": {
+                      "type": "array"
+                    }
+                  },
+                  "resources": [
+                    {
+                      "condition": "[parameters('deployDNSZoneGroup')]",
+                      "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                      "apiVersion": "2020-11-01",
+                      "name": "[format('{0}/{1}', parameters('privateEndpoitName'), 'default')]",
+                      "properties": {
+                        "privateDnsZoneConfigs": "[parameters('privateDNSZoneConfigs')]"
+                      },
+                      "dependsOn": [
+                        "[resourceId('Microsoft.Network/privateEndpoints', parameters('privateEndpoitName'))]"
+                      ]
+                    },
+                    {
+                      "type": "Microsoft.Network/privateEndpoints",
+                      "apiVersion": "2020-11-01",
+                      "name": "[parameters('privateEndpoitName')]",
+                      "location": "[parameters('resourceLocation')]",
+                      "properties": {
+                        "subnet": {
+                          "id": "[parameters('subnetID')]"
+                        },
+                        "privateLinkServiceConnections": [
+                          {
+                            "name": "[parameters('privateEndpoitName')]",
+                            "properties": {
+                              "privateLinkServiceId": "[parameters('privateLinkServiceId')]",
+                              "groupIds": [
+                                "[parameters('groupID')]"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Resources/deployments', 'DeployPrivateDNSZones')]"
+              ]
+            },
+            {
+              "condition": "[equals(parameters('ctrlDeployCosmosDB'), true())]",
+              "type": "Microsoft.Resources/deployments",
+              "apiVersion": "2020-10-01",
+              "name": "CosmosDBSQLPrivateLink",
+              "properties": {
+                "expressionEvaluationOptions": {
+                  "scope": "inner"
+                },
+                "mode": "Incremental",
+                "parameters": {
+                  "groupID": {
+                    "value": "Sql"
+                  },
+                  "privateEndpoitName": {
+                    "value": "[format('{0}-sql', parameters('cosmosDBAccountName'))]"
+                  },
+                  "privateLinkServiceId": {
+                    "value": "[parameters('cosmosDBAccountID')]"
+                  },
+                  "resourceLocation": {
+                    "value": "[parameters('resourceLocation')]"
+                  },
+                  "subnetID": {
+                    "value": "[parameters('subnetID')]"
+                  },
+                  "deployDNSZoneGroup": {
+                    "value": "[parameters('ctrlDeployPrivateDNSZones')]"
+                  },
+                  "privateDNSZoneConfigs": {
+                    "value": [
+                      {
+                        "name": "privatelink-documents-azure-com",
+                        "properties": {
+                          "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.documents.azure.com')]"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "metadata": {
+                    "_generator": {
+                      "name": "bicep",
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -6506,8 +7038,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -6628,8 +7160,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.4.1124.51302",
-                      "templateHash": "17651664428836305209"
+                      "version": "0.4.1318.3566",
+                      "templateHash": "5419948910877226011"
                     }
                   },
                   "parameters": {
@@ -6704,6 +7236,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PurviewDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'StreamingServicesDeploy')]",
@@ -6733,13 +7266,13 @@
             "value": "[parameters('deploymentDatetime')]"
           },
           "deploymentScriptUAMIId": {
-            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.deploymentScriptUAMIID.value]"
+            "value": "[reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.deploymentScriptUAMIID.value]"
           },
           "purviewPSScriptLocation": {
             "value": "[variables('purviewPSScriptLocation')]"
           },
           "purviewScriptArguments": {
-            "value": "[format('-PurviewAccountID {0} -PurviewAccountName {1} -SubscriptionID {2} -ResourceGroupName {3} -UAMIIdentityID {4} -ScanEndpoint {5} -APIVersion {6} -SynapseWorkspaceName {7} -SynapseWorkspaceIdentityID {8} -KeyVaultName {9} -KeyVaultID {10} {11} {12} -NetworkIsolationMode {13}', if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewAccountID.value, ''), parameters('purviewAccountName'), subscription().subscriptionId, resourceGroup().name, reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.deploymentScriptUAMIPrincipalID.value, if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewScanEndpoint.value, ''), if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewAPIVersion.value, ''), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceName.value, reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceIdentityPrincipalID.value, parameters('keyVaultName'), reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.keyVaultID.value, variables('datalakeAccountPurviewParams'), if(parameters('ctrlDeployDataShare'), format('-DataShareIdentityID {0}', reference(resourceId('Microsoft.Resources/deployments', 'DataShareDeploy'), '2020-10-01').outputs.dataShareAccountPrincipalID.value), ''), parameters('networkIsolationMode'))]"
+            "value": "[format('-PurviewAccountID {0} -PurviewAccountName {1} -SubscriptionID {2} -ResourceGroupName {3} -UAMIIdentityID {4} -ScanEndpoint {5} -APIVersion {6} -SynapseWorkspaceName {7} -SynapseWorkspaceIdentityID {8} -KeyVaultName {9} -KeyVaultID {10} {11} {12} -NetworkIsolationMode {13}', if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewAccountID.value, ''), parameters('purviewAccountName'), subscription().subscriptionId, resourceGroup().name, reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.deploymentScriptUAMIPrincipalID.value, if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewScanEndpoint.value, ''), if(parameters('ctrlDeployPurview'), reference(resourceId('Microsoft.Resources/deployments', 'PurviewDeploy'), '2020-10-01').outputs.purviewAPIVersion.value, ''), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceName.value, reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceIdentityPrincipalID.value, parameters('keyVaultName'), reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.keyVaultID.value, variables('datalakeAccountPurviewParams'), if(parameters('ctrlDeployDataShare'), format('-DataShareIdentityID {0}', reference(resourceId('Microsoft.Resources/deployments', 'DataShareDeploy'), '2020-10-01').outputs.dataShareAccountPrincipalID.value), ''), parameters('networkIsolationMode'))]"
           },
           "resourceLocation": {
             "value": "[parameters('resourceLocation')]"
@@ -6748,7 +7281,7 @@
             "value": "[variables('synapsePSScriptLocation')]"
           },
           "synapseScriptArguments": {
-            "value": "[format('-NetworkIsolationMode {0} -ctrlDeployAI ${1} -SubscriptionID {2} -ResourceGroupName {3} -ResourceGroupLocation {4} -UAMIIdentityID {5} -KeyVaultName {6} -KeyVaultID {7} {8} {9} {10} {11} {12} {13}', parameters('networkIsolationMode'), parameters('ctrlDeployAI'), subscription().subscriptionId, resourceGroup().name, resourceGroup().location, reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.deploymentScriptUAMIPrincipalID.value, parameters('keyVaultName'), reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy'), '2020-10-01').outputs.keyVaultID.value, format('-SynapseWorkspaceName {0} -SynapseWorkspaceID {1}', parameters('synapseWorkspaceName'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.synapseWorkspaceID.value), if(parameters('ctrlDeployAI'), format('-AzMLSynapseLinkedServiceIdentityID {0}', reference(resourceId('Microsoft.Resources/deployments', 'ServiceConnectionsDeploy'), '2020-10-01').outputs.azureMLSynapseLinkedServicePrincipalID.value), ''), format('-WorkspaceDataLakeAccountName {0} -WorkspaceDataLakeAccountID {1} -RawDataLakeAccountName {2} -RawDataLakeAccountID {3} -CuratedDataLakeAccountName {4} -CuratedDataLakeAccountID {5}', parameters('workspaceDataLakeAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy'), '2020-10-01').outputs.workspaceDataLakeAccountID.value, parameters('rawDataLakeAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.rawDataLakeStorageAccountID.value, parameters('curatedDataLakeAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy'), '2020-10-01').outputs.curatedDataLakeStorageAccountID.value), variables('azMLWorkspaceName'), if(parameters('ctrlDeployAI'), format('-TextAnalyticsAccountID {0} -TextAnalyticsAccountName {1} -TextAnalyticsEndpoint {2}', reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.textAnalyticsAccountID.value, parameters('textAnalyticsAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.textAnalyticsEndpoint.value), ''), if(parameters('ctrlDeployAI'), format('-AnomalyDetectorAccountID {0} -AnomalyDetectorAccountName {1} -AnomalyDetectorEndpoint {2}', reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.anomalyDetectorAccountID.value, parameters('anomalyDetectorName'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.anomalyDetectorEndpoint.value), ''))]"
+            "value": "[format('-NetworkIsolationMode {0} -ctrlDeployAI ${1} -SubscriptionID {2} -ResourceGroupName {3} -ResourceGroupLocation {4} -UAMIIdentityID {5} -KeyVaultName {6} -KeyVaultID {7} {8} {9} {10} {11} {12} {13} {14} {15}', parameters('networkIsolationMode'), parameters('ctrlDeployAI'), subscription().subscriptionId, resourceGroup().name, resourceGroup().location, reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.deploymentScriptUAMIPrincipalID.value, parameters('keyVaultName'), reference(resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')).outputs.keyVaultID.value, format('-SynapseWorkspaceName {0} -SynapseWorkspaceID {1}', parameters('synapseWorkspaceName'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.synapseWorkspaceID.value), if(parameters('ctrlDeployAI'), format('-AzMLSynapseLinkedServiceIdentityID {0}', reference(resourceId('Microsoft.Resources/deployments', 'ServiceConnectionsDeploy')).outputs.azureMLSynapseLinkedServicePrincipalID.value), ''), format('-WorkspaceDataLakeAccountName {0} -WorkspaceDataLakeAccountID {1} -RawDataLakeAccountName {2} -RawDataLakeAccountID {3} -CuratedDataLakeAccountName {4} -CuratedDataLakeAccountID {5}', parameters('workspaceDataLakeAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'SynapseDeploy')).outputs.workspaceDataLakeAccountID.value, parameters('rawDataLakeAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.rawDataLakeStorageAccountID.value, parameters('curatedDataLakeAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')).outputs.curatedDataLakeStorageAccountID.value), variables('azMLWorkspaceName'), if(parameters('ctrlDeployAI'), format('-TextAnalyticsAccountID {0} -TextAnalyticsAccountName {1} -TextAnalyticsEndpoint {2}', reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.textAnalyticsAccountID.value, parameters('textAnalyticsAccountName'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.textAnalyticsEndpoint.value), ''), if(parameters('ctrlDeployAI'), format('-AnomalyDetectorAccountID {0} -AnomalyDetectorAccountName {1} -AnomalyDetectorEndpoint {2}', reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.anomalyDetectorAccountID.value, parameters('anomalyDetectorName'), reference(resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy'), '2020-10-01').outputs.anomalyDetectorEndpoint.value), ''), if(parameters('ctrlDeployCosmosDB'), format('-CtrlDeployCosmosDB ${0} -CosmosDBAccountID {1} -CosmosDBAccountName {2} -CosmosDBDatabaseName {3}', parameters('ctrlDeployCosmosDB'), reference(resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy'), '2020-10-01').outputs.cosmosDBAccountID.value, reference(resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy'), '2020-10-01').outputs.cosmosDBAccountName.value, reference(resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy'), '2020-10-01').outputs.cosmosDBDatabaseName.value), ''), variables('sampleArtifactsParams'))]"
           }
         },
         "template": {
@@ -6757,8 +7290,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.1124.51302",
-              "templateHash": "9340154783333963281"
+              "version": "0.4.1318.3566",
+              "templateHash": "18362583168125093909"
             }
           },
           "parameters": {
@@ -6869,6 +7402,7 @@
         "[resourceId('Microsoft.Resources/deployments', 'AIServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'DataLakeDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'DataShareDeploy')]",
+        "[resourceId('Microsoft.Resources/deployments', 'OperationalDatabasesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PlatformServicesDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'PurviewDeploy')]",
         "[resourceId('Microsoft.Resources/deployments', 'RBACRoleAssignmentDeploy')]",

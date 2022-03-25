@@ -426,6 +426,56 @@
 								}
 							],
 							"visible": true
+						},
+						{
+							"name": "operationalDBSettings",
+							"type": "Microsoft.Common.Section",
+							"label": "Operational Database Settings",
+							"elements": [
+								{
+									"name": "ctrlDeployOperationalDB",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deploy Operational Databases",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": true
+								},
+								{
+									"name": "ctrlDeployCosmosDB",
+									"type": "Microsoft.Common.OptionsGroup",
+									"label": "Deploy CosmosDB",
+									"defaultValue": "Yes (recommended)",
+									"toolTip": "",
+									"constraints": {
+										"allowedValues": [
+										{
+											"label": "Yes (recommended)",
+											"value": "Yes"
+										},
+										{
+											"label": "No",
+											"value": "No"
+										}
+										],
+										"required": true
+									},
+									"visible": "[equals(steps('workloadComponents').operationalDBSettings.ctrlDeployOperationalDB, 'Yes')]"
+								}
+							],
+							"visible": true
 						}
 					]
 				},
@@ -524,6 +574,61 @@
 					]
 				},
 				{
+					"name": "sampleArtifacts",
+					"label": "Sample Artifacts",
+					"elements": [
+						{
+							"name": "sampleArtifactsDescription",
+							"type": "Microsoft.Common.InfoBox",
+							"visible": true,
+							"options": {
+								"icon": "Info",
+								"text": "Sample artifacts are for educational purposes only. These are SQL scripts, notebooks, datasets, linked services, dataflows and pipelines created in your Synapse workspace based on the collection chosen.",
+								"uri": "https://www.microsoft.com"
+							}
+						},
+						{
+							"name": "ctrlDeploySampleArtifacts",
+							"type": "Microsoft.Common.OptionsGroup",
+							"label": "Deploy Sample Artifacts",
+							"defaultValue": "Yes (recommended)",
+							"toolTip": "",
+							"constraints": {
+								"allowedValues": [
+								{
+									"label": "Yes (recommended)",
+									"value": "Yes"
+								},
+								{
+									"label": "No",
+									"value": "No"
+								}
+								],
+								"required": true
+							},
+							"visible": true
+						},
+						{
+							"name": "sampleArtifactCollectionName",
+							"type": "Microsoft.Common.DropDown",
+							"label": "Collection name:",
+							"placeholder": "",
+							"defaultValue": "OpenDatasets",
+							"toolTip": "",
+							"constraints": {
+								"allowedValues": [
+									{
+										"label": "Open Datasets",
+										"value": "OpenDatasets"
+									}
+								],
+								"required": true
+							},
+							"visible": "[equals(steps('sampleArtifacts').ctrlDeploySampleArtifacts, 'Yes')]"
+						}
+					]
+				},
+				{
 					"name": "tags",
 					"label": "Tags",
 					"elements": [
@@ -563,7 +668,11 @@
 				"vNetName": "[steps('networkSettings').vNetConfigSection.vNetConfig.name]",
 				"vNetIPAddressPrefixes": "[steps('networkSettings').vNetConfigSection.vNetConfig.addressPrefixes]",
 				"vNetSubnetName": "[steps('networkSettings').vNetConfigSection.vNetConfig.subnets.default.name]",
-				"vNetSubnetIPAddressPrefix": "[steps('networkSettings').vNetConfigSection.vNetConfig.subnets.default.addressPrefix]"
+				"vNetSubnetIPAddressPrefix": "[steps('networkSettings').vNetConfigSection.vNetConfig.subnets.default.addressPrefix]",
+				"ctrlDeployOperationalDB": "[equals(steps('workloadComponents').operationalDBSettings.ctrlDeployOperationalDB, 'Yes')]",
+				"ctrlDeployCosmosDB": "[equals(steps('workloadComponents').operationalDBSettings.ctrlDeployCosmosDB, 'Yes')]",
+				"ctrlDeploySampleArtifacts": "[equals(steps('sampleArtifacts').ctrlDeploySampleArtifacts, 'Yes')]",
+				"sampleArtifactCollectionName": "[steps('sampleArtifacts').sampleArtifactCollectionName]"
 			}
         }
     }

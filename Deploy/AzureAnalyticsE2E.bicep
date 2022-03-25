@@ -13,7 +13,7 @@ param networkIsolationMode string = 'default'
 param resourceLocation string = resourceGroup().location
 
 @description('Unique Suffix')
-param uniqueSuffix string = substring(uniqueString(resourceGroup().id),0,5)
+param uniqueSuffix string = substring(uniqueString(resourceGroup().id),0,6)
 
 //********************************************************
 // Workload Deployment Control Parameters
@@ -24,6 +24,14 @@ param ctrlDeployAI bool = true     //Controls the deployment of Azure ML and Cog
 param ctrlDeployStreaming bool = true   //Controls the deployment of EventHubs and Stream Analytics
 param ctrlDeployDataShare bool = true   //Controls the deployment of Azure Data Share
 param ctrlDeployPrivateDNSZones bool = true //Controls the creation of private DNS zones for private links
+param ctrlDeployOperationalDB bool = false  ////Controls the creation of operational Azure database data sources
+param ctrlDeployCosmosDB bool = false //Controls the creation of CosmosDB if (ctrlDeployOperationalDBs == true)
+param ctrlDeploySampleArtifacts bool = false //Controls the creation of sample artifcats (SQL Scripts, Notebooks, Linked Services, Datasets, Dataflows, Pipelines) based on chosen template.
+
+@allowed([
+  'OpenDatasets'
+])
+param sampleArtifactCollectionName string = 'OpenDatasets'
 
 @allowed([
   'new'
@@ -227,6 +235,14 @@ param streamAnalyticsJobName string = 'azstreamjob${uniqueSuffix}'
 @description('Azure Stream Analytics Job Name')
 param streamAnalyticsJobSku string = 'Standard'
 
+
+//CosmosDB account parameters
+@description('CosmosDB Account Name')
+param cosmosDBAccountName string = 'azcosmosdb${uniqueSuffix}'
+
+@description('CosmosDB Database Name')
+param cosmosDBDatabaseName string = 'OperationalDB'
+
 //********************************************************
 // Variables
 //********************************************************
@@ -402,8 +418,28 @@ module m_DataLakeDeploy 'modules/DataLakeDeploy.bicep' = {
   }
 }
 
+
 //********************************************************
-// DEPENDENT RESOURCES DEPLOY
+// OPERATIONAL DATABASES DEPLOY
+//********************************************************
+
+module m_OperationalDatabasesDeploy 'modules/OperationalDBDeploy.bicep' = if(ctrlDeployOperationalDB) {
+  name: 'OperationalDatabasesDeploy'
+  dependsOn:[
+    m_SynapseDeploy
+  ]
+  params: {
+    networkIsolationMode: networkIsolationMode
+    cosmosDBAccountName: cosmosDBAccountName
+    cosmosDBDatabaseName: cosmosDBDatabaseName
+    resourceLocation: resourceLocation
+    ctrlDeployCosmosDB: ctrlDeployCosmosDB
+    synapseWorkspaceID: m_SynapseDeploy.outputs.synapseWorkspaceID
+  }
+}
+
+//********************************************************
+// SERVICE CONNECTIONS DEPLOY
 //********************************************************
 
 module m_ServiceConnectionsDeploy 'modules/ServiceConnectionsDeploy.bicep' = {
@@ -415,6 +451,7 @@ module m_ServiceConnectionsDeploy 'modules/ServiceConnectionsDeploy.bicep' = {
     m_DataLakeDeploy
     m_AIServicesDeploy
     m_StreamingServicesDeploy
+    m_OperationalDatabasesDeploy
   ]
   params: {
     ctrlDeployPurview: ctrlDeployPurview
@@ -442,6 +479,8 @@ module m_ServiceConnectionsDeploy 'modules/ServiceConnectionsDeploy.bicep' = {
     synapseSparkPoolName: ctrlDeploySynapseSparkPool ? m_SynapseDeploy.outputs.synapseWorkspaceSparkName : synapseSparkPoolName
     textAnalyticsAccountName:  textAnalyticsAccountName
     uamiPrincipalID: m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID
+    cosmosDBAccountName: ctrlDeployCosmosDB ? m_OperationalDatabasesDeploy.outputs.cosmosDBAccountName : ''
+    ctrlDeployCosmosDB: ctrlDeployCosmosDB
   }
 }
 
@@ -453,6 +492,7 @@ module m_RBACRoleAssignment 'modules/AzureRBACDeploy.bicep' = {
   name: 'RBACRoleAssignmentDeploy'
   dependsOn:[
     m_ServiceConnectionsDeploy
+    m_OperationalDatabasesDeploy
   ]
   params: {
     ctrlDeployDataShare: ctrlDeployDataShare
@@ -472,9 +512,12 @@ module m_RBACRoleAssignment 'modules/AzureRBACDeploy.bicep' = {
     iotHubPrincipalID: ctrlDeployStreaming? m_StreamingServicesDeploy.outputs.iotHubPrincipalID : ''
     ctrlStreamingIngestionService: ctrlStreamIngestionService
     purviewAccountName: purviewAccountName
+    ctrlDeployOperationalDB: ctrlDeployOperationalDB
+    ctrlDeployCosmosDB: ctrlDeployCosmosDB
+    cosmosDBAccountName: cosmosDBAccountName
+    cosmosDBDatabaseName: cosmosDBDatabaseName
   }
 }
-
 
 module m_VirtualNetworkIntegration 'modules/VirtualNetworkIntegrationDeploy.bicep' = if(networkIsolationMode == 'vNet') {
   name: 'VirtualNetworkIntegration'
@@ -525,6 +568,9 @@ module m_VirtualNetworkIntegration 'modules/VirtualNetworkIntegrationDeploy.bice
     textAnalyticsAccountName: ctrlDeployAI ? m_AIServicesDeploy.outputs.textAnalyticsAccountName : ''
     workspaceDataLakeAccountID: m_SynapseDeploy.outputs.workspaceDataLakeAccountID
     workspaceDataLakeAccountName: m_SynapseDeploy.outputs.workspaceDataLakeAccountName
+    cosmosDBAccountID: ctrlDeployOperationalDB && ctrlDeployCosmosDB ? m_OperationalDatabasesDeploy.outputs.cosmosDBAccountID : ''
+    cosmosDBAccountName: ctrlDeployOperationalDB && ctrlDeployCosmosDB ? m_OperationalDatabasesDeploy.outputs.cosmosDBAccountName : ''
+    ctrlDeployCosmosDB: ctrlDeployCosmosDB
   }
 }
 
@@ -542,10 +588,13 @@ var synapsePSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6d
 var azMLSynapseLinkedServiceIdentityID = ctrlDeployAI ? '-AzMLSynapseLinkedServiceIdentityID ${m_ServiceConnectionsDeploy.outputs.azureMLSynapseLinkedServicePrincipalID}' : ''
 var azMLWorkspaceName = ctrlDeployAI ? '-AzMLWorkspaceName ${azureMLWorkspaceName}' : ''
 var azTextAnalyticsParams = ctrlDeployAI ? '-TextAnalyticsAccountID ${m_AIServicesDeploy.outputs.textAnalyticsAccountID} -TextAnalyticsAccountName ${textAnalyticsAccountName} -TextAnalyticsEndpoint ${m_AIServicesDeploy.outputs.textAnalyticsEndpoint}' : ''
+var azCosmosDBParams = ctrlDeployCosmosDB ? '-CtrlDeployCosmosDB $${ctrlDeployCosmosDB} -CosmosDBAccountID ${m_OperationalDatabasesDeploy.outputs.cosmosDBAccountID} -CosmosDBAccountName ${m_OperationalDatabasesDeploy.outputs.cosmosDBAccountName} -CosmosDBDatabaseName ${m_OperationalDatabasesDeploy.outputs.cosmosDBDatabaseName}' : ''
 var azAnomalyDetectorParams = ctrlDeployAI ? '-AnomalyDetectorAccountID ${m_AIServicesDeploy.outputs.anomalyDetectorAccountID} -AnomalyDetectorAccountName ${anomalyDetectorName} -AnomalyDetectorEndpoint ${m_AIServicesDeploy.outputs.anomalyDetectorEndpoint}' : ''
 var datalakeAccountSynapseParams = '-WorkspaceDataLakeAccountName ${workspaceDataLakeAccountName} -WorkspaceDataLakeAccountID ${m_SynapseDeploy.outputs.workspaceDataLakeAccountID} -RawDataLakeAccountName ${rawDataLakeAccountName} -RawDataLakeAccountID ${m_DataLakeDeploy.outputs.rawDataLakeStorageAccountID} -CuratedDataLakeAccountName ${curatedDataLakeAccountName} -CuratedDataLakeAccountID ${m_DataLakeDeploy.outputs.curatedDataLakeStorageAccountID}'
 var synapseWorkspaceParams = '-SynapseWorkspaceName ${synapseWorkspaceName} -SynapseWorkspaceID ${m_SynapseDeploy.outputs.synapseWorkspaceID}'
-var synapseScriptArguments = '-NetworkIsolationMode ${networkIsolationMode} -ctrlDeployAI $${ctrlDeployAI} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceGroup().location} -UAMIIdentityID ${m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID} -KeyVaultName ${keyVaultName} -KeyVaultID ${m_PlatformServicesDeploy.outputs.keyVaultID} ${synapseWorkspaceParams} ${azMLSynapseLinkedServiceIdentityID} ${datalakeAccountSynapseParams} ${azMLWorkspaceName} ${azTextAnalyticsParams} ${azAnomalyDetectorParams}'
+var sampleArtifactsParams = ctrlDeploySampleArtifacts ? '-CtrlDeploySampleArtifacts $True -SampleArtifactCollectioName ${sampleArtifactCollectionName}' : ''
+
+var synapseScriptArguments = '-NetworkIsolationMode ${networkIsolationMode} -ctrlDeployAI $${ctrlDeployAI} -SubscriptionID ${subscription().subscriptionId} -ResourceGroupName ${resourceGroup().name} -ResourceGroupLocation ${resourceGroup().location} -UAMIIdentityID ${m_PlatformServicesDeploy.outputs.deploymentScriptUAMIPrincipalID} -KeyVaultName ${keyVaultName} -KeyVaultID ${m_PlatformServicesDeploy.outputs.keyVaultID} ${synapseWorkspaceParams} ${azMLSynapseLinkedServiceIdentityID} ${datalakeAccountSynapseParams} ${azMLWorkspaceName} ${azTextAnalyticsParams} ${azAnomalyDetectorParams} ${azCosmosDBParams} ${sampleArtifactsParams}'
 
 //Purview Deployment Script: script location encoded in Base64
 var purviewPSScriptLocation = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0F6dXJlL2F6dXJlLXN5bmFwc2UtYW5hbHl0aWNzLWVuZDJlbmQvbWFpbi9EZXBsb3kvc2NyaXB0cy9QdXJ2aWV3UG9zdERlcGxveS5wczE='

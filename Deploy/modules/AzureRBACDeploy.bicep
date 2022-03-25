@@ -2,6 +2,8 @@ param ctrlDeployPurview bool
 param ctrlDeployAI bool
 param ctrlDeployDataShare bool 
 param ctrlDeployStreaming bool
+param ctrlDeployOperationalDB bool
+param ctrlDeployCosmosDB bool 
 
 param rawDataLakeAccountName string
 param curatedDataLakeAccountName string
@@ -17,12 +19,16 @@ param streamAnalyticsIdentityPrincipalID string
 param ctrlStreamingIngestionService string
 param iotHubPrincipalID string
 
+param cosmosDBAccountName string
+param cosmosDBDatabaseName string
+
 
 var azureRBACStorageBlobDataReaderRoleID = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1' //Storage Blob Data Reader Role: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-reader
 var azureRBACStorageBlobDataContributorRoleID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe' //Storage Blob Data Contributor Role: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor
 var azureRBACContributorRoleID = 'b24988ac-6180-42a0-ab88-20f7382dd24c' //Contributor: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#contributor
 var azureRBACOwnerRoleID = '8e3af657-a8ff-443c-a75c-2fe8c4bcb635' //Owner: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#owner
 var azureRBACReaderRoleID = 'acdd72a7-3385-48ef-bd42-f606fba81ae7' //Reader: https://docs.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#reader
+var cosmosDBDataContributorRoleID = '00000000-0000-0000-0000-000000000002' //Cosmos DB Built-in Data Contributor: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac#built-in-role-definitions
 
 //Reference existing resources for permission assignment scope
 resource r_rawDataLakeStorageAccount 'Microsoft.Storage/storageAccounts@2021-06-01' existing = {
@@ -43,6 +49,10 @@ resource r_synapseWorkspace 'Microsoft.Synapse/workspaces@2021-06-01' existing =
 
 resource r_purviewAccount 'Microsoft.Purview/accounts@2021-07-01' existing = {
   name: purviewAccountName
+}
+
+resource r_cosmosDBAccount 'Microsoft.DocumentDB/databaseAccounts@2021-10-15' existing = {
+  name: cosmosDBAccountName
 }
 
 //Assign Owner Role to UAMI in the Synapse Workspace. UAMI needs to be Owner so it can assign itself as Synapse Admin and create resources in the Data Plane.
@@ -208,6 +218,16 @@ resource r_purviewSynapseReader 'Microsoft.Authorization/roleAssignments@2020-08
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', azureRBACReaderRoleID)
     principalId: ctrlDeployPurview ? purviewIdentityPrincipalID : ''
     principalType:'ServicePrincipal'
+  }
+}
+
+//CosmosDB SQL Role Assignment as per: https://docs.microsoft.com/en-us/azure/cosmos-db/how-to-setup-rbac?msclkid=0c60517dac2011ec89f6c50e70ceb530#built-in-role-definitions
+resource r_SynapseSQLRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2021-10-15' = if (ctrlDeployOperationalDB && ctrlDeployCosmosDB){
+  name: '${cosmosDBAccountName}/${guid('d9b6b1c6-7e97-4693-b58a-5d1a567d413f', subscription().subscriptionId, resourceGroup().id)}'
+  properties:{
+    principalId: r_synapseWorkspace.identity.principalId
+    roleDefinitionId: '${ctrlDeployCosmosDB ? r_cosmosDBAccount.id : ''}/sqlRoleDefinitions/${cosmosDBDataContributorRoleID}' // Cosmos DB Built-in Data Contributor
+    scope: '${ctrlDeployCosmosDB ? r_cosmosDBAccount.id : ''}/dbs/${cosmosDBDatabaseName}'
   }
 }
 

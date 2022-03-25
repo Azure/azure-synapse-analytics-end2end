@@ -14,6 +14,7 @@ param(
   [string] $CuratedDataLakeAccountName,
   [string] $CuratedDataLakeAccountID,
   [string] $UAMIIdentityID,
+  [Parameter(Mandatory=$false)]
   [bool] $CtrlDeployAI,
   [AllowEmptyString()]
   [Parameter(Mandatory=$false)]
@@ -38,7 +39,23 @@ param(
   [string] $AnomalyDetectorAccountName,
   [AllowEmptyString()]
   [Parameter(Mandatory=$false)]
-  [string] $AnomalyDetectorEndpoint
+  [string] $AnomalyDetectorEndpoint,
+  [Parameter(Mandatory=$false)]
+  [bool] $CtrlDeployCosmosDB,
+  [AllowEmptyString()]
+  [Parameter(Mandatory=$false)]
+  [string] $CosmosDBAccountID,
+  [AllowEmptyString()]
+  [Parameter(Mandatory=$false)]
+  [string] $CosmosDBAccountName,
+  [AllowEmptyString()]
+  [Parameter(Mandatory=$false)]
+  [string] $CosmosDBDatabaseName,
+  [Parameter(Mandatory=$false)]
+  [bool] $CtrlDeploySampleArtifacts,
+  [AllowEmptyString()]
+  [Parameter(Mandatory=$false)]
+  [string] $SampleArtifactCollectioName
 )
 
 
@@ -112,6 +129,155 @@ function Save-SynapseLinkedService{
           Start-Sleep $secondsDelay
           $retrycount++
       }
+    }
+  }
+}
+
+function Save-SynapseSampleArtifacts{
+  param (
+      [string] $SynapseWorkspaceName,
+      [string] $SampleArtifactCollectionName
+  )
+
+  #Install Synapse PowerShell Module
+  if (Get-Module -ListAvailable -Name "Az.Synapse") {
+      Write-Host "PowerShell Module Az.Synapse already installed."
+  } 
+  else {
+      Install-Module Az.Synapse -Force
+  }
+
+  $synapseTokens = @{"`#`#azsynapsewks`#`#" = $SynapseWorkspaceName; }
+  $indexFileUrl = "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/index.json"
+  $sampleCodeIndex = Invoke-WebRequest $indexFileUrl | ConvertFrom-Json
+
+  foreach($sampleArtifactCollection in $sampleCodeIndex)
+  {
+    if ($sampleArtifactCollection.template -eq $SampleArtifactCollectionName) {
+      Write-Host "Deploying Sample Artifact Collection: $($sampleArtifactCollection.template)"
+      Write-Host "-----------------------------------------------------------------------"
+
+      #Create SQL Script artifacts.
+      Write-Host "Deploying SQL Scripts:"
+      Write-Host "-----------------------------------------------------------------------"
+      foreach($sqlScript in $sampleArtifactCollection.artifacts.sqlScripts)
+      {
+        $fileContent = Invoke-WebRequest $sqlScript.definitionFilePath
+
+        if ($sqlScript.tokens.length -gt 0) {
+            foreach($token in $sqlScript.tokens)
+            {
+                $fileContent = $fileContent -replace $token, $synapseTokens.Get_Item($token)
+            }
+        }
+
+        $definitionFilePath = [guid]::NewGuid()
+        Set-Content -Path $definitionFilePath $fileContent
+        Set-AzSynapseSqlScript -WorkspaceName $SynapseWorkspaceName -Name $sqlScript.name -DefinitionFile $definitionFilePath -FolderPath $sqlScript.workspaceFolderPath
+        Remove-Item -Path $definitionFilePath
+      }
+
+      #Create Linked Service artifacts.
+      Write-Host "Deploying Linked Service:"
+      Write-Host "-----------------------------------------------------------------------"
+      foreach($linkedService in $sampleArtifactCollection.artifacts.linkedServices)
+      {
+        $fileContent = Invoke-WebRequest $linkedService.definitionFilePath
+
+        if ($linkedService.tokens.length -gt 0) {
+            foreach($token in $linkedService.tokens)
+            {
+                $fileContent = $fileContent -replace $token, $synapseTokens.Get_Item($token)
+            }
+        }
+
+        $definitionFilePath = [guid]::NewGuid()
+        Set-Content -Path $definitionFilePath $fileContent 
+        Set-AzSynapseLinkedService -WorkspaceName $SynapseWorkspaceName -Name $linkedService.name -DefinitionFile $definitionFilePath 
+        Remove-Item -Path $definitionFilePath
+      }
+
+      #Create Dataset artifacts.
+      Write-Host "Deploying Datasets:"
+      Write-Host "-----------------------------------------------------------------------"
+      foreach($dataset in $sampleArtifactCollection.artifacts.datasets)
+      {
+        $fileContent = Invoke-WebRequest $dataset.definitionFilePath
+
+        if ($dataset.tokens.length -gt 0) {
+            foreach($token in $dataset.tokens)
+            {
+                $fileContent = $fileContent -replace $token, $synapseTokens.Get_Item($token)
+            }
+        }
+
+        $definitionFilePath = [guid]::NewGuid()
+        Set-Content -Path $definitionFilePath $fileContent
+        Set-AzSynapseDataset -WorkspaceName $SynapseWorkspaceName -Name $dataset.name -DefinitionFile $definitionFilePath
+        Remove-Item -Path $definitionFilePath
+      }
+
+      #Create Dataflows artifacts.
+      Write-Host "Deploying Dataflows:"
+      Write-Host "-----------------------------------------------------------------------"
+      foreach($dataflow in $sampleArtifactCollection.artifacts.dataflows)
+      {
+        $fileContent = Invoke-WebRequest $dataflow.definitionFilePath
+
+        if ($dataflow.tokens.length -gt 0) {
+            foreach($token in $dataflow.tokens)
+            {
+                $fileContent = $fileContent -replace $token, $synapseTokens.Get_Item($token)
+            }
+        }
+
+        $definitionFilePath = [guid]::NewGuid()
+        Set-Content -Path $definitionFilePath $fileContent
+        Set-AzSynapseDataFlow -WorkspaceName $SynapseWorkspaceName -Name $dataflow.name -DefinitionFile $definitionFilePath
+        Remove-Item -Path $definitionFilePath
+      }
+
+      #Create Pipeline artifacts.
+      Write-Host "Deploying Pipelines:"
+      Write-Host "-----------------------------------------------------------------------"
+      foreach($pipeline in $sampleArtifactCollection.artifacts.pipelines)
+      {
+        $fileContent = Invoke-WebRequest $pipeline.definitionFilePath
+
+        if ($pipeline.tokens.length -gt 0) {
+            
+            foreach($token in $pipeline.tokens)
+            {
+                $fileContent = $fileContent -replace $token, $synapseTokens.Get_Item($token)
+            }
+        }
+
+        $definitionFilePath = [guid]::NewGuid()
+        Set-Content -Path $definitionFilePath $fileContent
+        Set-AzSynapsePipeline -WorkspaceName $SynapseWorkspaceName -Name $pipeline.name -DefinitionFile $definitionFilePath
+        Remove-Item -Path $definitionFilePath
+      }
+
+      #Create Notebook artifacts.
+      Write-Host "Deploying Notebooks:"
+      Write-Host "-----------------------------------------------------------------------"
+      foreach($notebook in $sampleArtifactCollection.artifacts.notebooks)
+      {
+        $fileContent = Invoke-WebRequest $notebook.definitionFilePath
+
+        if ($notebook.tokens.length -gt 0) {
+          foreach($token in $notebook.tokens)
+          {
+              $fileContent = $fileContent -replace $token, $synapseTokens.Get_Item($token)
+          }
+        }
+
+        $definitionFilePath = [guid]::NewGuid()
+        Set-Content -Path $definitionFilePath $fileContent
+        Set-AzSynapseNotebook -WorkspaceName $SynapseWorkspaceName -Name $notebook.name -DefinitionFile $definitionFilePath -FolderPath $notebook.workspaceFolderPath
+        Remove-Item -Path $definitionFilePath
+      }
+      break
     }
   }
 }
@@ -214,9 +380,9 @@ for ($i = 0; $i -lt $dataLakeAccountNames.Length ; $i++ ) {
 #------------------------------------------------------------------------------------------------------------
 # DATA PLANE OPERATION: CREATE AZURE ML LINKED SERVICE
 #------------------------------------------------------------------------------------------------------------
-#-AzMLWorkspaceName paramater will be passed blank if AI workloadis not deployed.
+#-AzMLWorkspaceName paramater will be passed blank if AI workload is not deployed.
 
-if (-not ([string]::IsNullOrEmpty($AzMLWorkspaceName))) {
+if ($CtrlDeployAI) {
   $body = "{
     name: ""$AzMLWorkspaceName"",
     properties: {
@@ -236,6 +402,38 @@ if (-not ([string]::IsNullOrEmpty($AzMLWorkspaceName))) {
   }"
 
   Save-SynapseLinkedService $SynapseWorkspaceName $AzMLWorkspaceName $body
+}
+
+#------------------------------------------------------------------------------------------------------------
+# DATA PLANE OPERATION: CREATE COSMOSDB LINKED SERVICE
+#------------------------------------------------------------------------------------------------------------
+#-CosmosDBAccountName paramater will be passed blank if CosmosDB workload is not deployed.
+
+if ($CtrlDeployCosmosDB) {
+  $body = "{
+  name: ""$CosmosDBAccountName"",
+  properties: {
+    annotations: [],
+    type: ""CosmosDb"",
+    typeProperties: {
+      connectionString: ""AccountEndpoint=https://$CosmosDBAccountName.documents.azure.com:443/;Database=OperationalDB"",
+      accountKey: {
+        type: ""AzureKeyVaultSecret"",
+        store: {
+          referenceName: ""$KeyVaultName"",
+          type: ""LinkedServiceReference""
+        },
+        secretName: ""$CosmosDBAccountName-Key""
+      }
+    },
+    connectVia: {
+      referenceName: ""AutoResolveIntegrationRuntime"",
+      type: ""IntegrationRuntimeReference""
+    }
+  }
+}"
+
+  Save-SynapseLinkedService $SynapseWorkspaceName $CosmosDBAccountName $body
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -284,26 +482,37 @@ if ($CtrlDeployAI) {
 # For vNet-integrated deployments, create the private endpoints to the resources required by Synapse managed vNet
 #------------------------------------------------------------------------------------------------------------
 
-[string[]] $managedPrivateEndpointNames = $KeyVaultName, $WorkspaceDataLakeAccountName, $RawDataLakeAccountName, $CuratedDataLakeAccountName
-[string[]] $managedPrivateEndpointIDs = $KeyVaultID, $WorkspaceDataLakeAccountID, $RawDataLakeAccountID, $CuratedDataLakeAccountID
-[string[]] $managedPrivateEndpointGroups = 'vault', 'dfs', 'dfs', 'dfs'
-
-if($CtrlDeployAI) {
-  #If AI workload is deployed then add cognitive services to the list of managed endpoints.
-  [string[]] $cognitiveServicePrivateEndpointNames = $TextAnalyticsAccountName, $AnomalyDetectorAccountName
-  [string[]] $cognitiveServicePrivateEndpointIDs = $TextAnalyticsAccountID, $AnomalyDetectorAccountID
-  [string[]] $cognitiveServicePrivateEndpointGroups =  'account', 'account'
-
-  $managedPrivateEndpointNames += $cognitiveServicePrivateEndpointNames
-  $managedPrivateEndpointIDs += $cognitiveServicePrivateEndpointIDs
-  $managedPrivateEndpointGroups += $cognitiveServicePrivateEndpointGroups
-}
-
-
+#Create Managed Private Endpoints
 if ($NetworkIsolationMode -eq "vNet") {
+  [string[]] $managedPrivateEndpointNames = $KeyVaultName, $WorkspaceDataLakeAccountName, $RawDataLakeAccountName, $CuratedDataLakeAccountName
+  [string[]] $managedPrivateEndpointIDs = $KeyVaultID, $WorkspaceDataLakeAccountID, $RawDataLakeAccountID, $CuratedDataLakeAccountID
+  [string[]] $managedPrivateEndpointGroups = 'vault', 'dfs', 'dfs', 'dfs'
+
+  #If AI workload is deployed then add cognitive services to the list of managed endpoints.
+  if($CtrlDeployAI) {
+    [string[]] $cognitiveServicePrivateEndpointNames = $TextAnalyticsAccountName, $AnomalyDetectorAccountName
+    [string[]] $cognitiveServicePrivateEndpointIDs = $TextAnalyticsAccountID, $AnomalyDetectorAccountID
+    [string[]] $cognitiveServicePrivateEndpointGroups =  'account', 'account'
+
+    $managedPrivateEndpointNames += $cognitiveServicePrivateEndpointNames
+    $managedPrivateEndpointIDs += $cognitiveServicePrivateEndpointIDs
+    $managedPrivateEndpointGroups += $cognitiveServicePrivateEndpointGroups
+  }
+
+  #If CosmosDB operational workload is deployed then add CosmosDB SQL and Analytical subsystems to the list of managed endpoints.
+  if ($CtrlDeployCosmosDB) {
+      [string[]] $cosmosDBPrivateEndpointNames = $CosmosDBAccountName, $CosmosDBAccountName
+      [string[]] $cosmosDBPrivateEndpointIDs = $CosmosDBAccountID, $CosmosDBAccountID
+      [string[]] $cosmosDBPrivateEndpointGroups = 'Analytical', 'Sql'
+    
+      $managedPrivateEndpointNames += $cosmosDBPrivateEndpointNames
+      $managedPrivateEndpointIDs += $cosmosDBPrivateEndpointIDs
+      $managedPrivateEndpointGroups += $cosmosDBPrivateEndpointGroups
+  }
+
   for($i = 0; $i -le ($managedPrivateEndpointNames.Length - 1); $i += 1)
   {
-    $managedPrivateEndpointName = $managedPrivateEndpointNames[$i]
+    $managedPrivateEndpointName = [System.String]::Concat($managedPrivateEndpointNames[$i],"-",$managedPrivateEndpointGroups[$i])
     $managedPrivateEndpointID = $managedPrivateEndpointIDs[$i]
     $managedPrivateEndpointGroup = $managedPrivateEndpointGroups[$i] 
 
@@ -355,7 +564,7 @@ if ($NetworkIsolationMode -eq "vNet") {
     
     while (-not $completed) {
       try {
-        $managedPrivateEndpointName = $managedPrivateEndpointNames[$i]
+        $managedPrivateEndpointName = [System.String]::Concat($managedPrivateEndpointNames[$i],"-",$managedPrivateEndpointGroups[$i])
         $managedPrivateEndpointID = $managedPrivateEndpointIDs[$i]
         # Approve KeyVault Private Endpoint
         $privateEndpoints = Get-AzPrivateEndpointConnection -PrivateLinkResourceId $managedPrivateEndpointID -ErrorAction Stop | where-object{$_.PrivateEndpoint.Id -match ($SynapseWorkspaceName + "." + $managedPrivateEndpointName)} | select-object Id, ProvisioningState, PrivateLinkServiceConnectionState
@@ -390,6 +599,15 @@ if ($NetworkIsolationMode -eq "vNet") {
       }
     }
   }
+}
+
+#------------------------------------------------------------------------------------------------------------
+# DATA PLANE OPERATION: DEPLOY SAMPLE ARTIFACTS
+# Deploy sample artifcats (SQL Scripts, Datasets, Linked Services, Pipelines and Notebooks) based on chosen template.
+#------------------------------------------------------------------------------------------------------------
+
+if ($CtrlDeploySampleArtifacts) {
+  Save-SynapseSampleArtifacts $SynapseWorkspaceName $SampleArtifactCollectioName
 }
 
 #------------------------------------------------------------------------------------------------------------

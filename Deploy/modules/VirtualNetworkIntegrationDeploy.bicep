@@ -8,6 +8,7 @@ param ctrlDeployPrivateDNSZones bool
 param ctrlDeployAI bool
 param ctrlDeployPurview bool
 param ctrlDeployStreaming bool 
+param ctrlDeployCosmosDB bool
 param ctrlStreamIngestionService string
 
 //Key Vault Params
@@ -58,6 +59,10 @@ param azureMLContainerRegistryName string
 param azureMLWorkspaceID string
 param azureMLWorkspaceName string
 
+//CosmosDB account params
+param cosmosDBAccountID string
+param cosmosDBAccountName string
+
 var storageEnvironmentDNS = environment().suffixes.storage
 
 
@@ -70,6 +75,7 @@ module m_DeployPrivateDNSZones './PrivateDNSZonesDeploy.bicep' = if (ctrlDeployP
     ctrlDeployAI: ctrlDeployAI
     ctrlDeployPurview: ctrlDeployPurview
     ctrlDeployStreaming: ctrlDeployStreaming
+    ctrlDeployCosmosDB: ctrlDeployCosmosDB
   }
 }
 
@@ -149,6 +155,16 @@ resource r_privateDNSZoneSynapseDev 'Microsoft.Network/privateDnsZones@2020-06-0
 //Private DNS Zones required for Synapse Private Link
 resource r_privateDNSZoneSynapseWeb 'Microsoft.Network/privateDnsZones@2020-06-01' existing = {
   name: 'privatelink.azuresynapse.net'
+}
+
+//Private DNS Zones required for CosmosDB SQL
+resource r_privateDNSZoneCosmosDBSQL 'Microsoft.Network/privateDnsZones@2020-06-01' existing = {
+  name: 'privatelink.documents.azure.com'
+}
+
+//Private DNS Zones required for CosmosDB Analytics
+resource r_privateDNSZoneCosmosDBAnalytical 'Microsoft.Network/privateDnsZones@2020-06-01' existing = {
+  name: 'privatelink.analytics.cosmos.azure.com'
 }
 
 //==================================================================================================================
@@ -602,6 +618,30 @@ module m_dataLakeStorageAccountFilePrivateLink './PrivateEndpoint.bicep' = if(ct
         name:'privatelink-file-core-windows-net'
         properties:{
           privateDnsZoneId: r_privateDNSZoneStorageFile.id
+        }
+      }
+    ]
+  }
+}
+
+//Private Link for CosmosDB SQL subsystem
+module m_cosmosDBSQLPrivateLink './PrivateEndpoint.bicep' = if(ctrlDeployCosmosDB == true){
+  name: 'CosmosDBSQLPrivateLink'
+  dependsOn:[
+    m_DeployPrivateDNSZones
+  ]
+  params: {
+    groupID: 'Sql'
+    privateEndpoitName: '${cosmosDBAccountName}-sql'
+    privateLinkServiceId: cosmosDBAccountID
+    resourceLocation: resourceLocation
+    subnetID: subnetID
+    deployDNSZoneGroup: ctrlDeployPrivateDNSZones
+    privateDNSZoneConfigs: [
+      {
+        name:'privatelink-documents-azure-com'
+        properties:{
+          privateDnsZoneId: r_privateDNSZoneCosmosDBSQL.id
         }
       }
     ]
