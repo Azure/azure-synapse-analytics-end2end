@@ -66,27 +66,50 @@
                     "name": "01 - Getting Started with Delta Lake",
                     "definitionFilePath": "./opendatasets/notebooks/Getting Started with Delta Lake.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
-                    "tokens": [],
-                    "datasets":[
-                        {
-                            "name": "nyc_tlc_yellow",
-                            "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
-                            "tokens": []
-                        }
-                    ],
-                    "linkedServices":[
-                        {
-                            "name": "nyc_tlc_yellow",
-                            "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
-                            "tokens": []
-                        }
-                    ]
+                    "tokens": []
+                }
+            ],
+            "datasets":[
+                {
+                    "name": "nyc_tlc_yellow",
+                    "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
+                    "tokens": []
                 }
             ],
             "notebooks": [
                 {
-                    "name": "01 - Getting Started with Delta Lake",
-                    "definitionFilePath": "./opendatasets/notebooks/Getting Started with Delta Lake.ipynb",
+                    "name": "01 - Using Azure Open Datasets in Synapse",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/01.UsingOpenDatasetsSynapse.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "02 - Getting Started with Delta Lake",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/02.GettingStartedDeltaLake.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "03 - Data Exploration and ML Modeling using NYC Taxi dataset",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/03.DataExplorationMLModelingNYCTaxi.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "04 - Getting Started with Hyperspace Indexing",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/04.GettingStartedHyperspaceIndexing.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "05 - Read and write data from Azure Data Lake Storage Gen2",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/05.ReadWriteADLSGen2.ipynb",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                },
+                {
+                    "name": "06 - Charting with Synapse Notebooks",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/06.ChartingSynapseNotebook.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
                     "tokens": []
                 }
@@ -95,6 +118,108 @@
                 {
                     "name": "nyc_tlc_yellow",
                     "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
+                    "tokens": []
+                }
+            ]
+        }
+    },
+    {
+        "template": "OneClickPoC",
+        "artifacts" : {
+            "sqlScripts": [],
+            "pipelines": [
+                {
+                    "name": "TripFaresDataPipeline",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/pipeline/TripFaresDataPipeline.json",
+                    "tokens": []
+                }
+            ],
+            "datasets":[
+                {
+                    "name": "AzureSynapseAnalyticsFaresData",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/AzureSynapseAnalyticsFaresData.json",
+                    "tokens": []
+                },
+                {
+                    "name": "AzureSynapseAnalyticsTable1",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/AzureSynapseAnalyticsTable1.json",
+                    "tokens": []
+                },
+                {
+                    "name": "AzureSynapseAnalyticsTripsData",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/AzureSynapseAnalyticsTripsData.json",
+                    "tokens": []
+                },
+                {
+                    "name": "azureSynapseAnalyticsSchema",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/azureSynapseAnalyticsSchema.json",
+                    "tokens": []
+                },
+                {
+                    "name": "azureSynapseAnalyticsTable",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/azureSynapseAnalyticsTable.json",
+                    "tokens": []
+                },
+                {
+                    "name": "faresDataSink",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/faresDataSink.json",
+                    "tokens": []
+                },
+                {
+                    "name": "faresDataSource",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/faresDataSource.json",
+                    "tokens": []
+                },
+                {
+                    "name": "tripDataSink",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/tripDataSink.json",
+                    "tokens": []
+                },
+                {
+                    "name": "tripsDataSource",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataset/tripsDataSource.json",
+                    "tokens": []
+                }
+            ],
+            "dataflows":[
+                {
+                    "name": "tripFaresDataTransformations",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/dataflow/tripFaresDataTransformations.json",
+                    "tokens": []
+                }
+            ],
+            "notebooks": [
+                {
+                    "name": "Data Exploration and ML Modeling - NYC taxi predict using Spark MLlib",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/notebook/Data%20Exploration%20and%20ML%20Modeling%20-%20NYC%20taxi%20predict%20using%20Spark%20MLlib.json",
+                    "workspaceFolderPath": "OpenDatasets",
+                    "tokens": []
+                }
+            ],
+            "linkedServices":[
+                {
+                    "name": "HttpServerTripDataLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/HttpServerTripDataLinkedService.json",
+                    "tokens": []
+                },
+                {
+                    "name": "HttpServerTripFareDataLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/HttpServerTripFareDataLinkedService.json",
+                    "tokens": []
+                },
+                {
+                    "name": "TripFaresDataLakeStorageLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/TripFaresDataLakeStorageLinkedService.json",
+                    "tokens": []
+                },
+                {
+                    "name": "TripFaresSynapseAnalyticsLinkedService",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/TripFaresSynapseAnalyticsLinkedService.json",
+                    "tokens": []
+                },
+                {
+                    "name": "keyVaultLinkedservice",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/Test-Drive-Azure-Synapse-with-a-1-click-POC/main/synapsepoc/linkedService/keyVaultLinkedservice.json",
                     "tokens": []
                 }
             ]
