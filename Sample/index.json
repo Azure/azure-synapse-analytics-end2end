@@ -117,7 +117,7 @@
             "linkedServices":[
                 {
                     "name": "nyc_tlc_yellow",
-                    "definitionFilePath": "./opendatasets/datasets/nyc_tlc_yellow.json",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/LinkedServices/nyc_tlc_yellow.json",
                     "tokens": []
                 }
             ]
