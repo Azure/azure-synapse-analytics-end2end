@@ -66,37 +66,37 @@
             "notebooks": [
                 {
                     "name": "01 - Using Azure Open Datasets in Synapse",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/01.UsingOpenDatasetsSynapse.ipynb",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/01-UsingOpenDatasetsSynapse.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
                     "tokens": []
                 },
                 {
                     "name": "02 - Getting Started with Delta Lake",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/02.GettingStartedDeltaLake.ipynb",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/02-GettingStartedDeltaLake.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
                     "tokens": []
                 },
                 {
                     "name": "03 - Data Exploration and ML Modeling using NYC Taxi dataset",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/03.DataExplorationMLModelingNYCTaxi.ipynb",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/03-DataExplorationMLModelingNYCTaxi.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
                     "tokens": []
                 },
                 {
                     "name": "04 - Getting Started with Hyperspace Indexing",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/04.GettingStartedHyperspaceIndexing.ipynb",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/04-GettingStartedHyperspaceIndexing.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
                     "tokens": []
                 },
                 {
                     "name": "05 - Read and write data from Azure Data Lake Storage Gen2",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/05.ReadWriteADLSGen2.ipynb",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/05-ReadWriteADLSGen2.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
                     "tokens": []
                 },
                 {
                     "name": "06 - Charting with Synapse Notebooks",
-                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/06.ChartingSynapseNotebook.ipynb",
+                    "definitionFilePath": "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/OpenDatasets/Notebooks/06-ChartingSynapseNotebook.ipynb",
                     "workspaceFolderPath": "OpenDatasets",
                     "tokens": []
                 }
