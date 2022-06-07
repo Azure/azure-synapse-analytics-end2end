@@ -145,6 +145,7 @@ function Save-SynapseSampleArtifacts{
   } 
   else {
       Install-Module Az.Synapse -Force
+      Import-Module Az.Synapse
   }
 
   $synapseTokens = @{"`#`#azsynapsewks`#`#" = $SynapseWorkspaceName; }
