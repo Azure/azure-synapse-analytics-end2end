@@ -64,7 +64,7 @@ resource r_cleanUpPostDeployScript 'Microsoft.Resources/deploymentScripts@2020-1
     }
   }
   properties:{
-    azPowerShellVersion:'6.2'
+    azPowerShellVersion:'7.1.3'
     cleanupPreference:'OnSuccess'
     retentionInterval: 'P1D'
     timeout:'PT30M'
