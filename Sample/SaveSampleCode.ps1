@@ -49,6 +49,7 @@ function Save-SynapseSampleArtifacts{
                 }
 
                 if ($sqlScript.interface.ToLower() -eq "powershell") {
+                    Write-Host "Creating SQL Script: $($sqlScript.name) via PowerShell"
                     $definitionFilePath = [guid]::NewGuid()
                     Set-Content -Path $definitionFilePath $fileContent
                     Set-AzSynapseSqlScript -WorkspaceName $SynapseWorkspaceName -Name $sqlScript.name -DefinitionFile $definitionFilePath -FolderPath $sqlScript.workspaceFolderPath
@@ -56,8 +57,9 @@ function Save-SynapseSampleArtifacts{
                 }
                 elseif ($sqlScript.interface.ToLower() -eq "rest")
                 {
+                    Write-Host "Creating SQL Script: $($sqlScript.name) via REST API"
                     $subresource = "sqlScripts"
-                    $uri = [System.Web.HttpUtility]::UrlEncode("https://$SynapseWorkspaceName.dev.azuresynapse.net/$subresource/$($sqlScript.name)?api-version=2020-02-01-preview")
+                    $uri = "https://$SynapseWorkspaceName.dev.azuresynapse.net/$subresource/$($sqlScript.name)?api-version=2020-02-01"
             
                     #Assign Synapse Workspace Administrator Role to UAMI
                     $body = $fileContent
@@ -80,10 +82,23 @@ function Save-SynapseSampleArtifacts{
                     }
                 }
 
-                $definitionFilePath = [guid]::NewGuid()
-                Set-Content -Path $definitionFilePath $fileContent 
-                Set-AzSynapseLinkedService -WorkspaceName $SynapseWorkspaceName -Name $linkedService.name -DefinitionFile $definitionFilePath 
-                Remove-Item -Path $definitionFilePath
+                if ($sqlScript.interface.ToLower() -eq "powershell") {
+                    Write-Host "Creating Linked Service: $($linkedService.name) via PowerShell"
+                    $definitionFilePath = [guid]::NewGuid()
+                    Set-Content -Path $definitionFilePath $fileContent
+                    Set-AzSynapseLinkedService -WorkspaceName $SynapseWorkspaceName -Name $linkedService.name -DefinitionFile $definitionFilePath
+                    Remove-Item -Path $definitionFilePath    
+                }
+                elseif ($sqlScript.interface.ToLower() -eq "rest")
+                {
+                    Write-Host "Creating Linked Service: $($linkedService.name) via REST API"
+                    $subresource = "linkedservices"
+                    $uri = "https://$SynapseWorkspaceName.dev.azuresynapse.net/$subresource/$($linkedService.name)?api-version=2020-02-01"
+            
+                    #Assign Synapse Workspace Administrator Role to UAMI
+                    $body = $fileContent
+                    Invoke-RestMethod -Method Put -ContentType "application/json" -Uri $uri -Headers $headers -Body $body
+                }
             }
 
             #Create Dataset artifacts.
@@ -175,4 +190,4 @@ function Save-SynapseSampleArtifacts{
     }
 }
 
-Save-SynapseSampleArtifacts "azsynapsewksry2pub" "OneClickPoC"
+Save-SynapseSampleArtifacts "azsynapsewksynt6a3" "SynapseRetail"

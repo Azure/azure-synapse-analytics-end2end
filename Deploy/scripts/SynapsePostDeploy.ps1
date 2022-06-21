@@ -151,6 +151,10 @@ function Save-SynapseSampleArtifacts{
   #Add System.Web type to encode/decode URL
   Add-Type -AssemblyName System.Web
 
+  #Authenticate for REST API calls
+  $token = (Get-AzAccessToken -Resource "https://dev.azuresynapse.net").Token
+  $headers = @{ Authorization = "Bearer $token" }
+
   $synapseTokens = @{"`#`#azsynapsewks`#`#" = $SynapseWorkspaceName; }
   $indexFileUrl = "https://raw.githubusercontent.com/Azure/azure-synapse-analytics-end2end/main/Sample/index.json"
   $sampleCodeIndex = Invoke-WebRequest $indexFileUrl | ConvertFrom-Json
@@ -176,19 +180,21 @@ function Save-SynapseSampleArtifacts{
         }
 
         if ($sqlScript.interface.ToLower() -eq "powershell") {
+          Write-Host "Creating SQL Script: $($sqlScript.name) via PowerShell"
           $definitionFilePath = [guid]::NewGuid()
           Set-Content -Path $definitionFilePath $fileContent
           Set-AzSynapseSqlScript -WorkspaceName $SynapseWorkspaceName -Name $sqlScript.name -DefinitionFile $definitionFilePath -FolderPath $sqlScript.workspaceFolderPath
           Remove-Item -Path $definitionFilePath    
         }
-        elseif ($sqlScript.interface.ToLower() -eq "rest"){
-          $uri = [System.Web.HttpUtility]::UrlEncode("https://$SynapseWorkspaceName.dev.azuresynapse.net/sqlScripts/$($sqlScript.name)?api-version=2020-02-01-preview")
-          $token = (Get-AzAccessToken -Resource "https://dev.azuresynapse.net").Token
-          $headers = @{ Authorization = "Bearer $token" }
-
-          #Assign Synapse Workspace Administrator Role to UAMI
-          $body = $fileContent
-          Invoke-RestMethod -Method Put -ContentType "application/json" -Uri $uri -Headers $headers -Body $body
+        elseif ($sqlScript.interface.ToLower() -eq "rest")
+        {
+            Write-Host "Creating SQL Script: $($sqlScript.name) via REST API"
+            $subresource = "sqlScripts"
+            $uri = "https://$SynapseWorkspaceName.dev.azuresynapse.net/$subresource/$($sqlScript.name)?api-version=2020-02-01"
+    
+            #Assign Synapse Workspace Administrator Role to UAMI
+            $body = $fileContent
+            Invoke-RestMethod -Method Put -ContentType "application/json" -Uri $uri -Headers $headers -Body $body
         }
       }
 

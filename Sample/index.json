@@ -139,7 +139,13 @@
             "pipelines": [],
             "datasets":[],
             "notebooks": [],
-            "linkedServices":[]
+            "linkedServices":[
+                {
+                    "name": "AzureBlobStorageSCD",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/linkedService/AzureBlobStorageSCD.json"
+                }
+            ]
         }
     },
     {
