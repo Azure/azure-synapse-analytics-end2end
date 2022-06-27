@@ -179,20 +179,6 @@
 									"visible": true
 								},
 								{
-									"name": "synapseADXPoolName",
-									"type": "Microsoft.Common.TextBox",
-									"label": "Synapse Data Explorer Pool Name",
-									"placeholder": "",
-									"defaultValue": "ADXPool",
-									"toolTip": "Use only allowed characters",
-									"constraints": {
-										"required": true,
-										"regex": "^[a-z0-9A-Z]{1,30}$",
-										"validationMessage": "Only alphanumeric characters are allowed, and the value must be 1-30 characters long."
-									},
-									"visible": "[equals(steps('synapseSettings').synapseSettingsSection.ctrlDeploySynapseADXPool, 'Yes')]"
-								},
-								{
 									"name": "synapseADXDatabaseName",
 									"type": "Microsoft.Common.TextBox",
 									"label": "Synapse Data Explorer Database Name",
@@ -658,7 +644,6 @@
 				"synapseDedicatedSQLPoolName": "[steps('synapseSettings').synapseSettingsSection.synapseDedicatedSQLPoolName]",
 				"ctrlDeploySynapseSparkPool": "[equals(steps('synapseSettings').synapseSettingsSection.ctrlDeploySynapseSparkPool, 'Yes')]",
 				"ctrlDeploySynapseADXPool": "[equals(steps('synapseSettings').synapseSettingsSection.ctrlDeploySynapseADXPool, 'Yes')]",
-				"synapseADXPoolName": "[steps('synapseSettings').synapseSettingsSection.synapseADXPoolName]",
 				"synapseADXDatabaseName": "[steps('synapseSettings').synapseSettingsSection.synapseADXDatabaseName]",
 				"synapseSparkPoolName": "[steps('synapseSettings').synapseSettingsSection.synapseSparkPoolName]",
 				"synapseSqlAdminUserName": "[steps('synapseSettings').synapseSettingsSection.synapseSqlAdminUserName]",
