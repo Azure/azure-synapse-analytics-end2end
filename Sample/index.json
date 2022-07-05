@@ -145,6 +145,134 @@
                     "interface": "rest",
                     "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/linkedService/AzureBlobStorageSCD.json"
                 }
+            ],
+            "dataflows":[
+                {
+                    "name": "DimChannel_DF",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/dataflow/DimChannel_DF.json"
+                },
+                {
+                    "name": "DimCustomer_DF",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/dataflow/DimCustomer_DF.json"
+                },
+                {
+                    "name": "DimDate_DF",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/dataflow/DimDate_DF.json"
+                },
+                {
+                    "name": "DimGeography_DF",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/dataflow/DimGeography_DF.json"
+                },
+                {
+                    "name": "DimProduct_DF",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/dataflow/DimProduct_DF.json"
+                },
+                {
+                    "name": "FactSales_DF",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/dataflow/FactSales_DF.json"
+                },
+                {
+                    "name": "adworks_DF",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/dataflow/adworks_DF.json"
+                }
+            ],
+            "databases": [
+                {
+                    "name": "adworks",
+                    "interface": "rest",
+                    "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks.json",
+                    "tables": [
+                        {
+                            "name": "Calendar",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/table/Calendar.json"
+                        },
+                        {
+                            "name": "InternetCustomer",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/table/InternetCustomer.json"
+                        },
+                        {
+                            "name": "Location",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/table/Location.json"
+                        },
+                        {
+                            "name": "ProductData",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/table/ProductData.json"
+                        },
+                        {
+                            "name": "Sales",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/table/Sales.json"
+                        },
+                        {
+                            "name": "Reseller",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/table/Reseller.json"
+                        },
+                        {
+                            "name": "SalesTerritory",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/table/SalesTerritory.json"
+                        }
+                    ],
+                    "relationships":[
+                        {
+                            "name": "relationship-bvbxmtunqg",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-bvbxmtunqg.json"
+                        },
+                        {
+                            "name": "relationship-dngliwnwob",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-dngliwnwob.json"
+                        },
+                        {
+                            "name": "relationship-fybugkapdy",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-fybugkapdy.json"
+                        },
+                        {
+                            "name": "relationship-icsxkfyxeh",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-icsxkfyxeh.json"
+                        },
+                        {
+                            "name": "relationship-kdnwhffnmf",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-kdnwhffnmf.json"
+                        },
+                        {
+                            "name": "relationship-somtklqqvv",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-somtklqqvv.json"
+                        },
+                        {
+                            "name": "relationship-spacklmtsb",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-spacklmtsb.json"
+                        },
+                        {
+                            "name": "relationship-uefhwxjtyv",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-uefhwxjtyv.json"
+                        },
+                        {
+                            "name": "relationship-xggfxzuwec",
+                            "interface": "rest",
+                            "definitionFilePath": "https://raw.githubusercontent.com/jchinchillaMSFT/ww-csu-psk-synapse-retail/main/database/adworks/relationship/relationship-xggfxzuwec.json"
+                        }
+                    ]
+                }
             ]
         }
     },
