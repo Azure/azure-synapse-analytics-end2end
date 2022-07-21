@@ -130,10 +130,10 @@ param synapseSparkPoolName string = 'SparkPool'
 param synapseSparkPoolNodeSize string = 'Small'
 
 @description('Spark Min Node Count')
-param synapseSparkPoolMinNodeCount int = 2
+param synapseSparkPoolMinNodeCount int = 3
 
 @description('Spark Max Node Count')
-param synapseSparkPoolMaxNodeCount int = 2
+param synapseSparkPoolMaxNodeCount int = 3
 
 @description('Deploy ADX Pool')
 param ctrlDeploySynapseADXPool bool = false //Controls the creation of Synapse Spark Pool
