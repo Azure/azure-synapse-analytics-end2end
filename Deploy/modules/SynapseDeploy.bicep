@@ -4,6 +4,7 @@ param resourceLocation string
 param ctrlDeploySynapseSQLPool bool
 param ctrlDeploySynapseSparkPool bool
 param ctrlDeploySynapseADXPool bool
+param ctrlDeployPurview bool
 
 param workspaceDataLakeAccountName string
 
@@ -85,9 +86,9 @@ resource r_synapseWorkspace 'Microsoft.Synapse/workspaces@2021-06-01' = {
     managedVirtualNetworkSettings: (networkIsolationMode == 'vNet')? {
       preventDataExfiltration:true
     }: null
-    purviewConfiguration:{
+    purviewConfiguration: (ctrlDeployPurview == true)? {
       purviewResourceId: purviewAccountID
-    }
+    }: null
   }
 
   //Dedicated SQL Pool
