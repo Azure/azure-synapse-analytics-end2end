@@ -643,7 +643,7 @@ var synapseScriptArguments = join([
   '${azAnomalyDetectorParams}'
   '${azCosmosDBParams}'
   '${sampleArtifactsParams}'
-  '${resourceNamesCollectionParams}'
+//'${resourceNamesCollectionParams}'
 ], ' ')
 
 
